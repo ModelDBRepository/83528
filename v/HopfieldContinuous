@@ -1,0 +1,87 @@
+global {
+ iter         0
+ areas        1
+ mult         1
+
+ d "/tmp/coco"
+}
+
+all {
+ /**default area size**/
+ d_a          4
+ d_b          14
+}
+
+
+/**This file implements a one-layer associator network with continuos neurons.
+
+   At each instant of the series, the following is done:
+   Presentation:   Data are written to the variable T over the whole relaxation time length, i.e. from 0 to rlen.
+   Initialization: Only at the beginning (time 0), the network activations R are initialized with the data.
+   Relaxation:     The network activations R develop freely (NO influence by the data!).
+                   Note: if order of second stay is o or s, at each time all neurons are updated, no need for {R;feed_copy;;;-1}.
+                   If order is r, then some neurons may not be updated, so first use {R;feed_copy;;;-1} to take over activations!
+   Learning:       Only now, the activations R are again compared to the data T.
+                   A difference rule moulds the weights so that the activations of the network shall develop like the data.
+   Write out:      Ater every 100 iterations (argument to series), an example relaxation (T and R; also weights) will be exported.
+
+   The patterns which have to be memorized are produced in data_gauss_move. See what it does in the file src/data.made.c.
+**/
+
+set rlen 15
+set epsW 0.1
+set epsWtimesdecW 0.0001
+
+
+series (1) {
+ sw (0; 1; alltime) {
+  0(n) {N,w; weight_list_alloc_full;   ;   ; -0.1+0.1}
+ }
+
+ sw (0; 1; order) {
+  0(o) {N,w; weight_list_cutself   ;   ;   ;    }
+ }
+}
+
+
+series (200000) {
+ /**presentation of the data**/
+ sw (0; $rlen; alltime) {
+  0(n) {T  ; data_gauss_move  ;     ;     ; 1,  1.0,  1.18,  1.0+-1.0} /**<-- upper "hill" moves 1 pixel to the right at each time step**/
+ }                                        /*new sigma height upper,lower velocity*/
+ sw (0; $rlen; order) {
+  0(o) {T  ; local_sum_const  ; ,   ; ,   ; 0.02 }
+ }
+ /**initialisation**/
+ sw (0; 1; order) {
+  0(o) {R  ; local_copy       ; ,   ; T,  ;      }      /**copy the data from T to activations R (once only at time 0)**/
+       {N,w; weight_list_decay;     ;     ; $epsWtimesdecW}
+ }
+ /**relaxation**/
+ sw (1; $rlen; order) {
+  0(o) {R  ; single_copy      ;     ;     ; -1 }        /**only necessary, if order of next stay is r, for the not-updated neurons**/
+  0(o) {R,w; weight_list_feed ;     ;     ; -1 }        /**fan-in into the neurons the activations from -1 time step before**/
+  0(o) {R  ; local_mean_01    ; ,   ; ,   ; 50+1+0+0+1} /**logistic sigmoid transfer function, thus continuous rate coding neurons**/
+ }
+ /**learning**/
+ sw (1; $rlen; order) {
+  0(o) {S  ; local_sub        ; ,   ; T, R;    }        /**post-synaptic term for the Hebb rule: target T - activation R**/
+       {L  ; single_copy      ;     ; R   ; -1 }        /**pre -synaptic term for the Hebb rule: activation -1 time step before**/
+  0(o) {N,w; weight_list_hebb ; ,   ; S, L; $epsW}
+ }
+
+ if  (iter % 3000)
+ sw (0; 1; order) {
+  if  (iter < 100000)
+  0(o) {N,w; weight_list_cutsmall;  ;     ; 0, 0.1+0.1}
+ }
+
+ /**write to files**/
+ if  (iter % 500)
+ sw (0; $rlen; alltime) {
+  0(n) {T,d; observe_act; ; ;  }                        /**data**/
+  0(n) {R,d; observe_act; ; ;  }                        /**neuronal activations**/
+  0(n) {S,d; observe_act; ; ;  }                        /**difference S=T-R**/
+  0(n) {N,w+d; weight_list_export;   ;   ;    }         /**ignores $rlen**/
+ }
+}

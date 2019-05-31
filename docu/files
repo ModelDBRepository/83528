@@ -1,0 +1,63 @@
+        INPUT FILE
+        ==========
+
+        mynet           batch file
+
+
+        FILES IN src/
+        =============
+
+        KERNEL
+
+  4458  iter.c          main()
+ 10174  relax.c         do series, sweeps, stays and commands
+ 78724  vehicle.c       tables: function names <--> pointers
+
+
+        LIBRARIES OF FUNCTIONS TO CHOOSE FROM
+
+ 11029  data.digits.c
+ 25612  data.images.c   functions using the data
+ 43455  data.made.c
+
+ 24170  local.c         functions within a neuron
+ 36859  total.c         functions within an area
+ 29980  feed.c          functions between areas
+
+ 40058  weight.c        functions for learning the weights
+
+ 32217  observe.c       functions for display
+
+
+        UTILITIES
+
+   465  num_recs.c
+ 12838  utils.c
+
+
+        FILES IN src/parser/
+        ====================
+
+ 24530  r.yacc.c        parses the batch parameter file
+  2420  r.lex           defines lexical elements
+  4942  prae.c          preprocesses the macros
+
+
+        EXECUTABLES (IN .)
+        ==================
+
+249312  iter.exe        the executable
+ 10548  prae.exe        another one for preprocessing
+
+
+        RESULT FILES (in /tmp/)
+        ============
+
+        obs_W_1_0.pnm   (example) weights (as image file)
+        obs_R_1.pnm               activations  (   "    )
+
+
+        RESULT VIEWER
+        =============
+
+  5806  look.tcl        TCL/TK file viewer

@@ -1,0 +1,22 @@
+\BOOKMARK [1][-]{section*.2}{Introduction}{}
+\BOOKMARK [1][-]{section*.3}{Installation}{}
+\BOOKMARK [2][-]{section*.4}{Directories and files}{section*.3}
+\BOOKMARK [1][-]{section*.5}{Program call}{}
+\BOOKMARK [2][-]{section*.6}{Options}{section*.5}
+\BOOKMARK [2][-]{section*.7}{``GUI'' \(image file viewer\)}{section*.5}
+\BOOKMARK [1][-]{section*.8}{The language}{}
+\BOOKMARK [2][-]{section*.9}{Global variables}{section*.8}
+\BOOKMARK [2][-]{section*.10}{Area sizes}{section*.8}
+\BOOKMARK [2][-]{section*.11}{Algorithm}{section*.8}
+\BOOKMARK [3][-]{section*.12}{Commands}{section*.11}
+\BOOKMARK [2][-]{section*.13}{Controls}{section*.8}
+\BOOKMARK [2][-]{section*.14}{Macros}{section*.8}
+\BOOKMARK [2][-]{section*.15}{Comments}{section*.8}
+\BOOKMARK [2][-]{section*.16}{Emacs and bluecredogreenlmagentaomygreenr}{section*.8}
+\BOOKMARK [1][-]{section*.17}{Help}{}
+\BOOKMARK [2][-]{section*.18}{Find a function}{section*.17}
+\BOOKMARK [2][-]{section*.19}{Debugging}{section*.17}
+\BOOKMARK [1][-]{section*.20}{Maintenance}{}
+\BOOKMARK [2][-]{section*.21}{Introduce a new function}{section*.20}
+\BOOKMARK [1][-]{section*.22}{An example}{}
+\BOOKMARK [1][-]{section*.23}{About}{}

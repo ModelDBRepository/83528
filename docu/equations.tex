@@ -1,0 +1,657 @@
+\documentclass[12pt]{article}
+\setlength{\oddsidemargin}{0.2in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\headheight}{0.0in}
+\setlength{\headsep}{0.5in}
+\setlength{\textwidth}{6.0in}
+\setlength{\textheight}{9.0in}
+\newcommand{\params}{\theta}
+\newcommand{\ba}{{\bf a}}
+\newcommand{\bah}{\hat{\bf a}}
+\newcommand{\bs}{{\bf s}}
+\newcommand{\bsh}{\hat{\bf s}}
+\newcommand{\bI}{{\bf I}}
+\newcommand{\bPhi}{{\bf \Phi}}
+\newcommand{\bnu}{{\bf \nu}}
+\newcommand{\be}{{\bf e}}
+\newcommand{\bLambdas}{{\bf \Lambda_s}}
+\newcommand{\bLambdaa}{{\bf \Lambda_a}}
+\newcommand{\bb}{{\bf b}}
+\def\lnot{\overline}
+\newcommand{\flipsi}{s_i\leftarrow\lnot{s_i}}
+\newcommand{\flipsk}{s_k\leftarrow\lnot{s_k}}
+\newcommand{\bH}{{\bf H}}
+\newcommand{\bJ}{{\bf J}}
+\newcommand{\bK}{{\bf K}}
+\newcommand{\bone}{{\bf 1}}
+\newcommand{\pd}[1]{\frac{\partial}{\partial #1}}
+\begin{document}
+
+
+\section{Image model}
+
+Our total image model is
+\begin{equation}
+P(\bI|\params) = \sum_{\bs} P(\bs|\params) 
+                 \int P(\bI|\ba,\params) P(\ba|\bs,\params) d\ba
+\end{equation}
+where
+\begin{eqnarray}
+P(\bI|\ba,\params) & = & \frac{1}{Z_{\lambda_N}} 
+  e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2} \\
+P(\ba|\bs,\params) & = & \frac{1}{Z_{\bLambdaa(\bs)}}
+  e^{-\frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba} \\
+P(\bs|\params) & = & \frac{1}{Z_{\bLambdas}}
+  e^{-\frac{1}{2} \bs^T \, \bLambdas\, \bs}
+\end{eqnarray}
+$\theta$ denotes the model parameters: $\bPhi$, $\lambda_N$,
+$\bLambdaa(\bs)$, and $\bLambdas$.  $\bLambdaa(\bs)$ and $\bLambdas$
+are (for now) diagonal matrices with elements
+$\bLambdaa(\bs)_{ii}=\lambda_{a_i}(s_i)$ and
+$\bLambdas_{ii}=\lambda_{s_i}$.  Variables $s_i$ are binary and $a_i$
+are analog.  Thus, $\lambda_{a_i}(s_i)$ takes on two values,
+$\lambda_{a_i}(0)$ and $\lambda_{a_i}(1)$, corresponding to the
+inverse variance of the Gaussian distribution over $a_i$ in the
+`inactive' and `active' states, respectively.
+
+
+\section{Inferring an optimal representation}
+
+Our problem is to find good estimates, $\bah$ and $\bsh$, derived from
+the posterior probability, $P(\ba,\bs|\bI,\params)$.  There are at
+least two possible avenues for doing this.  One is to seek a joint
+maximum of $P(\ba,\bs|\bI,\params)$ over $\ba$ and $\bs$.  The other
+is to seek a maximum of $\int P(\ba,\bs|\bI,\params)\, d\ba$ over $\bs$
+and then set $\bah=\arg\max_{\ba} P(\ba|\bI,\bsh)$.  The latter has
+the possible advantage that it will find modes of
+$P(\ba,\bs|\bI,\params)$ with high volume with respect to $\ba$.  We
+consider both of these routes here, labeled Method~1 and Method~2
+respectively.
+
+\subsection{Method 1: $\max_{\ba,\bs} P(\ba,\bs|\bI,\params)$}
+
+Here we seek a joint maximum of the posterior over $\ba$ and $\bs$:
+\begin{eqnarray}
+\bah,\bsh & = & \arg\max_{\ba,\bs} P(\ba,\bs|\bI,\params) \\
+ & = & \arg\max_{\ba,\bs} P(\ba,\bs,\bI|\params) \\
+ & = & \arg\max_{\ba,\bs} P(\bI|\ba,\params) P(\ba|\bs,\params)
+                            P(\bs|\params) \\
+ & = & \arg\min_{\ba,\bs} E(\ba,\bs)
+\end{eqnarray}
+where
+\begin{eqnarray}
+E(\ba,\bs) & = & -\log P(\ba,\bs,\bI|\params) \\
+  & = & \frac{\lambda_N}{2}|\bI-\bPhi \ba|^2 
+        + \log Z_{\bLambdaa(\bs)} + \frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba
+        + \frac{1}{2} \bs^T \, \bLambdas\, \bs  + \mbox{const.}
+\label{eq:log-posterior-terms}
+\end{eqnarray}
+Separating out the terms in $E(\ba,\bs)$ that depend on
+$\ba$ and $\bs$ from those that depend on $\bs$ alone, we obtain
+\begin{eqnarray}
+E(\ba,\bs) & = & E_{\ba|\bs}(\ba,\bs) + E_{\bs}(\bs) + \mbox{const.} \\
+E_{\ba|\bs}(\ba,\bs) & = & \frac{\lambda_N}{2}|\bI-\bPhi \ba|^2 + 
+                          \frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba  \\
+E_{\bs}(\bs) & = &  \log Z_{\bLambdaa(\bs)}
+                    + \frac{1}{2} \bs^T \, \bLambdas\, \bs  \; .
+\end{eqnarray}
+Our minimization problem then becomes
+\begin{eqnarray}
+\min_{\ba,\bs} E(\ba,\bs) & = & 
+  \min_{\ba,\bs}  \left(E_{\ba|\bs}(\ba,\bs) + E_{\bs}(\bs) \right) \\
+ & = & \min_{\bs} 
+         \left( \min_{\ba} E_{\ba|\bs}(\ba,\bs) + E_{\bs}(\bs) \right)  \; .
+\end{eqnarray}
+
+Let's first consider the inner minimization over $\ba$.  For a given
+$\bs$, the minimum of $E_{\ba|\bs}(\ba,\bs)$ will occur at
+\begin{eqnarray}
+\nabla_a E_{\ba|\bs}(\ba,\bs) & = & 0 \\
+ & = & -\lambda_N \bPhi^T \bI + \lambda_N \bPhi^T\bPhi\ba + \bLambdaa(\bs)\ba \\
+ & = & -\lambda_N \bb + \bH(\bs)\,\ba \; .
+\end{eqnarray}
+where $\bb=\bPhi^T\bI$ and $\bH(\bs)=\lambda\bPhi^T\bPhi +
+\bLambdaa(\bs)$.  Thus, the coefficients $\bah$ that minimizes
+$E_{\ba|\bs}(\ba,\bs)$ for a given $\bs$ are given by the solution to
+\begin{equation}
+\bH(\bs)\, \bah = \lambda_N \bb
+\end{equation}
+
+The outer minimization over $\bs$ may be accomplished by flipping the
+$s_i$ with a probability determined by the change in $E(\bah,\bs)$.
+Denoting the present state as $\bs_0$ and the state with one element
+$s_i$ flipped as $\bs_1$, and denoting the corresponding coefficients
+that minimize $E_{\ba|\bs}$ in each of those states as $\bah_0$ and
+$\bah_1$, respectively, then we have
+\begin{eqnarray}
+P(\flipsi) & = &
+  \frac{P(\bah_1,\bs_1|I,\params)}{
+        P(\bah_0,\bs_0|I,\params) + P(\bah_1,\bs_1|I,\params)} \\
+ & = & \frac{1}{1 + \frac{P(\bah_0,\bs_0|I,\params)}{
+                          P(\bah_1,\bs_1|I,\params)}} \\
+ & = & \frac{1}{1 + e^{-[E(\bah_0,\bs_0) - E(\bah_1,\bs_1)]}} \\
+ & = & \frac{1}{1 + e^{\Delta E(\flipsi)}} \; .
+\label{eq:flip-rule}
+\end{eqnarray}
+where $\Delta E(\flipsi)$ is the change in $E(\ba,\bs)$ due to
+flipping a single element $s_i$ and reminimizing over $\ba$.  If we
+wish to minimize $E(\bah,\bs)$, then a temperature should be assigned
+and progressively lowered as the $s_i$ are flipped.  That is,
+\begin{equation}
+P(\flipsi) = \frac{1}{1 + e^{\Delta E(\flipsi)/T}}
+\end{equation}
+
+\vspace{0.1in}
+
+Now we need to work out the details for computing $\Delta E(\flipsi)$.
+We have
+\begin{equation}
+\Delta E(\flipsi) = \Delta \min_{\ba} E_{\ba|\bs}(\flipsi) + 
+                                \Delta E_{\bs}(\flipsi)
+\end{equation}
+
+To figure out $\Delta E_{\bs}(\flipsi)$, let's first expand
+$E_{\bs}(\bs)$:
+\begin{eqnarray}
+E_{\bs}(\bs) & = & \log Z_{\bLambdaa(\bs)}
+                    + \frac{1}{2} \bs^T \, \bLambdas\, \bs \\
+ & = & \log((2\pi)^\frac{n}{2}|\det\bLambdaa(\bs)|^{-\frac{1}{2}})
+                    + \frac{1}{2} \bs^T \, \bLambdas\, \bs \\
+ & = & \mbox{const.} - \frac{1}{2}\log\det\bLambdaa(\bs) 
+                    + \frac{1}{2} \bs^T \, \bLambdas\, \bs \\
+ & = & \mbox{const.} - \frac{1}{2}\sum_i \log \lambda_{a_i}(s_i)
+                    + \frac{1}{2} \sum_i s_i \lambda_{s_i}
+\end{eqnarray}
+Thus,
+\begin{eqnarray}
+\Delta E_{\bs}(\flipsi) & = &  \frac{1}{2} 
+  \left[ -\log \lambda_{a_i}(\lnot{s_i}) - -\log \lambda_{a_i}(s_i) \right] +
+  \frac{1}{2} \left[ \lnot{s_i} \lambda_{s_i} - s_i \lambda_{s_i} \right] \\
+ & = & \frac{1}{2} 
+ \left[ \log \frac{\lambda_{a_i}(s_i)}{\lambda_{a_i}(\lnot{s_i})}
+        + \lambda_{s_i}(\lnot{s_i}-s_i) \right] 
+\end{eqnarray}
+
+Now to figure out $\Delta \min_{\ba} E_{\ba|\bs}(\flipsi)$, let's expand
+$E_{\ba|\bs}(\bah,\bs)$:
+\begin{eqnarray}
+E_{\ba|\bs}(\bah,\bs) & = & \frac{\lambda_N}{2}|\bI-\bPhi \bah|^2 + 
+                          \frac{1}{2} \bah^T \, \bLambdaa(\bs)\, \bah \\
+ & = & \frac{\lambda_N}{2}
+         \left[ |\bI|^2 - 2\bah^T\bPhi^T\bI + \bah^T\bPhi^T\bPhi\bah \right] +
+       \frac{1}{2} \bah^T \, \bLambdaa(\bs)\, \bah \\ 
+ & = & -\lambda_N \bah^T\bb 
+       + \frac{1}{2} \bah^T\, \bH(\bs)\, \bah + \mbox{const.}\\
+ & = & -\lambda_N \bah^T\bb + \frac{1}{2} \bah^T \lambda_N \bb + \mbox{const.}\\
+ & = & -\frac{\lambda_N}{2} \bah^T\bb + \mbox{const.}
+\end{eqnarray}
+We have used here the substitution $\bH(\bs) \, \bah = \lambda_N \bb$,
+as this condition always holds when $E_{\ba|\bs}(\ba,\bs)$ is at its
+minimum with respect to $\ba$.  The change in $\min_{\ba} E_{\ba|\bs}$
+for a flip of $s_i$ is thus
+\begin{eqnarray}
+\Delta \min_\ba E_{\ba|\bs}(\flipsi) & = & 
+  -\frac{\lambda_N}{2} \bah_1^T \bb 
+  - -\frac{\lambda_N}{2} \bah_0^T \bb \\
+ & = & -\frac{\lambda_N}{2} \Delta\ba^T \bb \; .
+\end{eqnarray}
+
+The total change in energy, $\Delta E(\flipsi)$, for a flip in $s_i$ is thus
+\begin{equation}
+\Delta E(\flipsi) = \frac{1}{2} 
+ \left[ \log \frac{\lambda_{a_i}(s_i)}{\lambda_{a_i}(\lnot{s_i})}
+        + \lambda_{s_i}(\lnot{s_i}-s_i) 
+  -\frac{\lambda_N}{2} \Delta\ba^T \bb \right] \; .
+\label{eq:dE1}
+\end{equation}
+
+The challenge at this point is to compute $\Delta\ba$ quickly.  Let's say
+that we have already computed the solution for $\ba$ for a current setting
+of $\bs$,
+\begin{equation}
+\bH(\bs_0) \, \bah_0 = \lambda_N \bb \, ,
+\end{equation}
+and that we also have the inverse to $\bH(\bs)$:
+\begin{equation}
+\bJ(\bs_0)=\bH(\bs_0)^{-1} \; .
+\end{equation}
+Now if we wish to compute the change in $\bah$ that would be incurred for
+flipping a single binary state variable, $s_k$, then we need to solve
+the problem
+\begin{equation}
+\left[ \bH(\bs) + \Delta\bLambdaa(\flipsk) \right]\, \bah_1 = \lambda_N \bb \; ,
+\end{equation}
+where $\Delta\bLambdaa(\flipsk)$ has a single non-zero element (always on the
+diagonal):
+\begin{equation}
+\Delta\bLambdaa(\flipsk)_{ij}=\left\{ \begin{array}{ll}
+ \Delta\lambda_{a_k}=\lambda_{a_k}(\lnot{s_k})-\lambda_{a_k}(s_k) & i=k,\,j=k \\
+ 0 & \mbox{otherwise}
+                                \end{array}  \right. \; .
+\end{equation}
+The change in $\bah$ is then
+\begin{eqnarray}
+\Delta \ba & = & \bah_1 - \bah_0 \\
+ & = & -\left[\frac{\Delta\lambda_{a_k}\, a_k}
+                   {1+\Delta\lambda_{a_k}\, J(\bs_0)_{kk}} \right] 
+        \bJ(\bs_0)_k \; ,
+\label{eq:change-sol}
+\end{eqnarray}
+where $\bJ(\bs_0)_k$ is the $k$-th column of $\bJ(\bs_0)$.  (See
+appendix~\ref{app:change-sol} for proof.)
+
+Note however that we must update $\bJ(\bs)$ if the change to $s_k$ is 
+accepted.  For this we use the Sherman-Morrison formula:
+\begin{equation}
+\bJ(\bs_1) = \bJ(\bs_0) - \left[ \frac{\Delta\lambda_{a_k}}
+                               {1+\Delta\lambda_{a_k}\, J(\bs_0)_{kk}} \right]
+                    \bJ(\bs_0)_k \bJ(\bs_0)_k^T \; .
+\end{equation}
+
+
+\subsection{Method 2: $\max_{\bs} \int P(\ba,\bs|\bI,\params) d\ba$}
+
+Here we first seek a maximum of the posterior over $\bs$ only:
+\begin{eqnarray}
+\bsh & = & \arg\max_{\bs} P(\bs|\bI,\params) \\
+ & = & \arg\max_{\bs} \int P(\ba,\bs|\bI,\params) d\ba \\
+ & = & \arg\max_{\bs} \int P(\ba,\bs,\bI|\params) d\ba \\
+ & = & \arg\max_{\bs} P(\bs|\params) 
+                      \int P(\bI|\ba,\params)\, P(\ba|\bs,\params)\, d\ba \\
+ & = & \arg\max_{\bs} 
+       \frac{1}{Z_{\bLambdas}} e^{-\frac{1}{2} \bs^T \, \bLambdas\, \bs} \,
+       \int \frac{1}{Z_{\lambda_N}} e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2} \, 
+            \frac{1}{Z_{\bLambdaa(\bs)}}
+              e^{-\frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba} \, d\ba\\
+ & = & \arg\max_{\bs} 
+       \frac{1}{Z_{\bLambdas}} e^{-\frac{1}{2} \bs^T \, \bLambdas\, \bs} \,
+       \frac{1}{Z_{\lambda_N}} \, \frac{1}{Z_{\bLambdaa(\bs)}} \,
+       \int e^{-E_{\ba|\bs}(\ba,\bs)} d\ba
+\label{eq:E-integral}
+\end{eqnarray}
+where $E_{\ba|\bs}(\ba,\bs)$ is the same as defined previously:
+\begin{equation}
+E_{\ba|\bs}(\ba,\bs) = \frac{\lambda_N}{2}|\bI-\bPhi \ba|^2 
+                        +  \frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba \; .
+\end{equation}
+This term is quadratic in $\ba$ and so may be rewritten in the form:
+\begin{eqnarray}
+E_{\ba|\bs}(\ba,\bs) & = & 
+  E_{\ba|\bs}(\bah,\bs) + \frac{1}{2}(\ba-\bah)^T \bH(\bs) (\ba-\bah) 
+  + \mbox{const.} \\
+\bah & = & \arg\min_{\ba} E_{\ba|\bs}(\ba,\bs) \\
+\bH(\bs) &  = & \nabla\nabla_{\ba} E_{\ba|\bs}(\ba,\bs)
+  =  \lambda_N \bPhi^T\bPhi + \bLambdaa(s) 
+\end{eqnarray}
+and so the integral $\int e^{-E_{\ba|\bs}(\ba,\bs)}d\ba$ evaluates to
+\begin{eqnarray}
+\int e^{-E_{\ba|\bs}(\ba,\bs)} d\ba & = & k\, e^{-E_{\ba|\bs}(\bah,\bs)} \, 
+    \int e^{-\frac{1}{2}(\ba-\bah)^T \bH(\bs) (\ba-\bah)} d\ba  \\
+ & = & k\, e^{-E_{\ba|\bs}(\bah,\bs)} \, 
+       (2\pi)^{\frac{n}{2}} |\det \bH(\bs)|^{-\frac{1}{2}}  \; . 
+\end{eqnarray}
+Our optimization problem is then
+\begin{eqnarray}
+\bsh & = & \arg\max_{\bs} 
+       \frac{1}{Z_{\bLambdas}} e^{-\frac{1}{2} \bs^T \, \bLambdas\, \bs} \,
+       \frac{1}{Z_{\lambda_N}} \, \frac{1}{Z_{\bLambdaa(\bs)}} \,
+       k\, e^{-E_{\ba|\bs}(\bah,\bs)} \, 
+       (2\pi)^{\frac{n}{2}} |\det \bH(\bs)|^{-\frac{1}{2}}  \\
+ & = & \arg\min_{\bs} E(\bs)
+\end{eqnarray}
+where
+\begin{eqnarray}
+E(\bs) & = & -\log P(\bs|\bI,\params) \\
+ & = & \frac{1}{2} \bs^T \, \bLambdas\, \bs + \log Z_{\bLambdaa(\bs)}
+       + E_{\ba|\bs}(\bah,\bs) - \frac{1}{2}\log\det \bH(\bs) + \mbox{const.} 
+\label{eq:Es}
+\end{eqnarray}
+
+We can now perform stochastic hill-climbing on $P(\bs|\bI,\params)$ by
+flipping bits $s_i$ according to
+\begin{equation}
+P(\flipsi) = \frac{1}{1 + e^{\Delta E(\flipsi)/T}} \; .
+\end{equation}
+We have already calculated how the first three terms in (\ref{eq:Es})
+are affected by a bit flip.  The only thing to do now is to figure out
+the change in $\log \det \bH(\bs)$ for a single flip $\flipsi$.  Here
+we use the relation
+\begin{equation}
+\det \bH(\bs_1) = \det\bH(s_0) \, (1 + \Delta\lambda_{a_i} J(\bs_0)_{ii}) \, ,
+\label{eq:change-det}
+\end{equation}
+(see appendix~\ref{app:change-det} for proof), and so
+\begin{equation}
+\Delta\log\det\bH(\flipsi) = 
+  \log\left( 1 + \Delta\lambda_{a_i} J(\bs_0)_{ii} \right) \; .
+\end{equation}
+Thus,
+\begin{equation}
+\Delta E(\flipsi) = \frac{1}{2} 
+ \left[ \log \frac{\lambda_{a_i}(s_i)}{\lambda_{a_i}(\lnot{s_i})}
+        + \lambda_{s_i}(\lnot{s_i}-s_i) 
+        -\lambda_N \Delta\ba^T \bb 
+  - \log\left( 1 + \Delta\lambda_{a_i} J(\bs_0)_{ii} \right) \right] \; .
+\label{eq:dE2}
+\end{equation}
+
+
+\subsection{Algorithm for finding an optimal represention}
+
+\noindent
+1. Initialize $\bs$ to all 1's.  Compute $\bH(\bs)$ and solve for $\ba$. 
+Set $T=1$.\\
+\\
+2. Loop over $k$=1:{\tt num\_coefficients}\\
+\\
+\indent 2a. Compute $\Delta E(\flipsk)$ according to either Method~1 or 2 
+            (eq.~\ref{eq:dE1} or \ref{eq:dE2}). \\
+\\
+\indent 2b. Accept flip with probability $P(\flipsk)$. \\
+\\
+\indent 2c. If flip accepted, $\flipsk$, $\ba \leftarrow \ba_1$, 
+            $\bJ \leftarrow \bJ(\bs_1)$. \\
+\\
+\indent End loop.\\
+\\
+3. Lower $T$ and go to 2 if $T>T_{\mbox{min}}$;  otherwise stop.
+
+
+
+\section{Learning}
+
+Our strategy for learning is to adjust the parameters, $\params$, to maximize
+the average log-likelihood of images under the model:
+\begin{equation}
+\hat{\params} = \arg\max_{\params} \langle \log P(\bI|\params) \rangle \; .
+\end{equation}
+We shall do this via gradient ascent.  In what follows, we derive the 
+derivatives for each parameter.
+
+\subsection{$\bLambdas$}
+
+\begin{eqnarray}
+\Delta \lambda_{s_i} & \propto &
+   \pd{\lambda_{s_i}} \langle \log P(\bI|\params) \rangle \\
+ & = & \frac{1}{P(\bI|\params)} \pd{\lambda_{s_i}} P(\bI|\params) \\
+ & = & \frac{1}{P(\bI|\params)} 
+          \sum_{\bs} \pd{\lambda_{s_i}} P(\bs|\params) 
+          \int P(\bI|\ba,\params) P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{P(\bI|\params)} 
+         \sum_{\bs} \frac{1}{2}\left[ \langle s_i \rangle_{P(s_i|\params)}
+                                        - s_i \right] P(\bs|\params) 
+           P(\bI|\bs,\params)
+\label{eq:si_prob-deriv} \\
+ & = & \frac{1}{2} \left[ \langle s_i \rangle_{P(s_i|\params)}
+                         - \langle s_i \rangle_{P(\bs|\bI,\params)} \right] \; .
+\end{eqnarray}
+To get (\ref{eq:si_prob-deriv}) we have used the general relation
+\begin{equation}
+\pd{\lambda} P(x|\lambda) = 
+  \left[ \langle f(x) \rangle_{P(x|\lambda)} - f(x) \right] P(x|\lambda)\; ,
+\label{eq:prob-deriv}
+\end{equation}
+when $P(x|\lambda)$ is of the form
+\begin{equation}
+P(x|\lambda)=\frac{1}{Z_\lambda} e^{-\lambda f(x)} \; .
+\end{equation}
+(See appendix~\ref{app:prob-deriv} for proof.)
+
+
+\subsection{$\bLambdaa(\bs)$}
+
+\begin{eqnarray}
+\Delta \lambda_{a_i}(t) & \propto &
+   \pd{\lambda_{a_i}(t)} \langle \log P(\bI|\params) \rangle \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\bLambdas) 
+        \int P(\bI|\ba,\params) 
+             \pd{\lambda_{a_i}(t)} P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\params) \\
+ &   & \int P(\bI|\ba,\params) \frac{1}{2} \delta(s_i-t) 
+        \left[ \langle a_i^2 \rangle_{P(a_i|t,\lambda_{a_i}(t))} - a_i^2 \right]
+         P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{2} \left\langle \delta(s_i-t) 
+       \left[ \langle a_i^2 \rangle_{P(a_i|t,\lambda_{a_i}(t))} - a_i^2 \right]
+       \right\rangle_{P(\ba,\bs|\bI,\params)} \\
+ & = & \frac{1}{2} \left\langle \delta(s_i-t) \left\langle
+       \left[ \frac{1}{\lambda_{a_i}(t)} - a_i^2 \right]
+                                         \right\rangle_{P(\ba|\bs,\bI,\params)}
+                     \right\rangle_{P(\bs|\bI,\params)} \; .
+\end{eqnarray}
+where $t$ takes on values 0,1.  We defer the problem of computing
+$\langle a_i^2 \rangle_{P(\ba|\bs,\bI,\params)}$ until the end of this
+section, as it is common to the other derivatives that follow.
+
+\subsection{$\lambda_N$}
+
+\begin{eqnarray}
+\Delta \lambda_N & \propto &
+   \pd{\lambda_N} \langle \log P(\bI|\params) \rangle \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\params) 
+        \int \pd{\lambda_N} P(\bI|\ba,\params) 
+              P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\params) \\
+ &   & \int \frac{1}{2} \left[ \left\langle |\bI-\bPhi\ba|^2 
+              \right\rangle_{P(\bI|\ba,\params)}
+                              - |\bI-\bPhi\ba|^2 \right] 
+             P(\bI|\ba,\params) P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{2} \left\langle \left[ \frac{n}{\lambda_N} 
+                                       - |\bI-\bPhi\ba|^2 \right]
+                   \right\rangle_{P(\ba,\bs|\bI,\params)} \\
+ & = & \frac{1}{2} \left[ \frac{n}{\lambda_N} - 
+         \left\langle \left\langle |\bI-\bPhi\ba|^2 
+                      \right\rangle_{P(\ba|\bs,\bI,\params)}
+         \right\rangle_{P(\bs|\bI,\params)} \right] \; .
+\end{eqnarray}
+Here we need to dissect $|\bI-\bPhi\ba|^2$ in terms of the moments on
+$\ba$ that need to be computed:
+\begin{eqnarray}
+\langle |\bI-\bPhi\ba|^2 \rangle & = & 
+  \langle |\bI|^2 - 2\ba^T\bPhi^T\bI + \ba^T\bPhi^T\bPhi\ba \rangle \\
+ & = & |\bI|^2 - 2\langle\ba^T\rangle\bb + 
+       \bone^T[\langle\ba\ba^T\rangle.*(\bPhi^T\bPhi)]\bone  \; .
+\end{eqnarray}
+where all averages are under the distribution
+$P(\ba|\bs,\bI,\params)$.  Again, we defer the problem of computing
+these moments until the end of this section.
+
+
+\subsection{$\bPhi$}
+
+\begin{eqnarray}
+\Delta \Phi_{ij} & \propto &
+   \pd{\Phi_{ij}} \langle \log P(\bI|\params) \rangle \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\params) 
+        \int \pd{\Phi_{ij}} P(\bI|\ba,\params) 
+              P(\ba|\bs,\params) d\ba \\
+ & = & \frac{1}{P(\bI|\params)} \sum_{\bs} P(\bs|\params)
+        \int \lambda_N \left[\bI-\bPhi\ba \right]\ba^T
+             P(\bI|\ba,\params) P(\ba|\bs,\params) d\ba \\
+ & = & \lambda_N \left\langle \left[\bI -\bPhi\ba \right] \ba^T
+                 \right\rangle_{P(\ba,\bs|\bI,\params)} \\
+ & = & \lambda_N \left\langle 
+                  \left[ \bI\langle\ba^T\rangle_{P(\ba|\bs,\bI,\params)}
+                        - \bPhi\langle\ba\ba^T\rangle_{ P(\ba|\bs,\bI,\params)}
+                  \right] \right\rangle_{P(\bs|\bI,\params)} \; .
+\end{eqnarray}
+
+
+\subsection{Computing $\langle\ba\rangle_{P(\ba|\bs,\bI,\params)}$
+and $\langle\ba\ba^T\rangle_{P(\ba|\bs,\bI,\params)}$}
+
+The posterior over $\ba$, $P(\ba|\bs,\bI,\params)$, is given by
+\begin{eqnarray}
+P(\ba|\bs,\bI,\params) & = & 
+  k P(\bI|\ba,\params) P(\ba|\bs,\params) \\
+ & = & k \frac{1}{Z_{\lambda_N}} e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2}
+  \frac{1}{Z_{\bLambdaa(\bs)}} e^{-\frac{1}{2} \ba^T \, \bLambdaa(\bs)\, \ba} \\
+ & = & \frac{1}{Z_{\bH(\bs)}} e^{-E_{\ba|\bs}(\ba,\bs)} 
+\end{eqnarray}
+where 
+\begin{equation}
+E_{\ba|\bs}(\ba,\bs) = E_{\ba|\bs}(\bah,\bs) +
+  \frac{1}{2}(\ba-\bah)^T \bH(\bs) (\ba-\bah) \; .
+\end{equation}
+Thus,
+\begin{equation}
+\langle\ba\rangle_{P(\ba|\bs,\bI,\params)} = \bah \; .
+\end{equation}
+Now to compute $\langle\ba\ba^T\rangle_{P(\ba|\bs,\bI,\params)}$ we use
+the fact that
+\begin{equation}
+\langle(\ba-\bah)(\ba-\bah)^T\rangle_{P(\ba|\bs,\bI,\params)} =
+  \bH(\bs)^{-1} 
+\end{equation}
+and so
+\begin{eqnarray}
+\langle\ba\ba^T\rangle_{P(\ba|\bs,\bI,\params)} 
+  &  = & \bH(\bs)^{-1} + \bah\bah^T \\
+  & = &  \bJ + \ba\ba^T \equiv \bK \; .
+\end{eqnarray}
+
+
+\subsection{Algorithm for adapting parameters}
+
+\noindent
+1. Initialize parameters: $\bLambdas, \bLambdaa(\bs), \lambda_N, \bPhi$.\\
+\\
+2. Loop over images\\
+\\
+\indent 2a. Gibbs sample on $P(\bs|\bI)$.  Collect statistics 
+            $\langle \bs \rangle$, $\langle \bah \rangle$, 
+            $\langle H(\bs) + \bah\bah^T \rangle$.\\
+\\
+\indent 2b. Accumulate statistics.\\
+\\
+3. Update parameters according to statistics accumulated over images.\\
+\\
+4. Go to 2.
+
+\vspace{0.25in}
+\noindent
+{\bf Subroutine for Gibbs sampling on $P(\bs|\bI)$:}\\
+\\
+\noindent
+1. Initialize $\bs$ to all 1's.  Compute $\bH(\bs)$ and solve for $\ba$. \\
+\\
+2. Loop over $k$=1:{\tt num\_coefficients}\\
+\\
+\indent 2a. Compute $\Delta E(\flipsk)$ according to Method 2 
+            (eq.~\ref{eq:dE2}). \\
+\\
+\indent 2b. Accept flip with probability $P(\flipsk)$. \\
+\\
+\indent 2c. If flip accepted, $\flipsk$, $\ba \leftarrow \ba_1$, 
+            $\bJ \leftarrow \bJ(\bs_1)$. \\
+\\
+\indent End loop.\\
+\\
+3. Go to 2 (for desired \# of sweeps).
+
+
+
+
+\appendix
+
+
+\section{Proof of~(\ref{eq:change-sol})}
+\label{app:change-sol}
+
+Comparing Equation (19) and Equation (42), which are to be solved for $\bah_0$ and $\bah_1$, respectively, we obtain
+\begin{equation}
+\left[ \bH(\bs) + \Delta\bLambdaa(\flipsk) \right]\, \bah_1 = \bH(\bs) \, \bah_0 \; .
+\end{equation}
+where $\bs=\bs_0$ (the state which leads to $\bah_0$). This yields
+\begin{eqnarray}
+\bah_1 - \bah_0 & = & \frac{\bH(\bs)}{\bH(\bs) + \Delta\bLambdaa(\flipsk)} \, \bah_0 - \bah_0 \\
+ & = & \frac{\bH(\bs)}{\bH(\bs) + \Delta\bLambdaa(\flipsk)} \, \bah_0 - \frac{\bH(\bs) + \Delta\bLambdaa(\flipsk)}{\bH(\bs) + \Delta\bLambdaa(\flipsk)} \, \bah_0 \\
+ & = & - \frac{\Delta\bLambdaa(\flipsk) \, \bah_0}{\bH(\bs) + \Delta\bLambdaa(\flipsk)} \\
+ & = & - \frac{\Delta\bLambdaa(\flipsk) \, \bah_0}{\bone + \Delta\bLambdaa(\flipsk) \bH(\bs)^{-1}} \, \bH(\bs)^{-1} \\
+ & = & -\left[\frac{\Delta\lambda_{a_k}\, a_k}
+                   {1+\Delta\lambda_{a_k}\, J(\bs_0)_{kk}} \right] \bJ(\bs_0)_k
+\end{eqnarray}
+The last step was made because the fraction represents a matrix with only one non-zero element, which is on the diagonal.
+Furthermore, $\bJ(\bs_0)=\bH(\bs)^{-1}$ and $\bJ(\bs_0)_k$ is the $k$-th column of $\bJ(\bs_0)$.
+
+
+\section{Proof of~(\ref{eq:change-det})}
+\label{app:change-det}
+
+According to the Leibnitz rule of the determinant, we have
+\begin{equation}
+\det \bH = \sum_j H_{ij} \det H_{i,\be_j}
+\end{equation}
+where
+\begin{equation}
+\bH_{i,\be_j} = \left( \begin{array}{c} \bH_1 \\ \vdots \\ \be_j \\ \vdots \end{array} \right)
+                       \begin{array}{c}\phantom{\bH_1} \\ \phantom{\vdots} \\ \mbox{ $\leftarrow$ $i$-th row } \\ \phantom{\vdots} \end{array}
+\end{equation}
+is obtained from the matrix $\bH$ by replacing its $i$-th row by the unity vector $\be_j$, which is $1$ at the $j$-th position, else zero.
+Rows $\bH_k$ of $\bH$ at other positions, $k \neq i$, remain.
+
+
+As $\bH(\bs_1)$ differs from $\bH(\bs_0)$ only in a single element $H_{ii}$, on the diagonal, we have
+\begin{eqnarray}
+\det \bH(\bs_1)
+ & = & \sum_{j, j\neq i} H_{ij}(\bs_0) \det \bH_{i,\be_j}(\bs_0) + H_{ii}(\bs_1) \det \bH_{i,\be_i}(\bs_0) \\
+ &   &                 + H_{ii}(\bs_0) \det \bH_{i,\be_i}(\bs_0) - H_{ii}(\bs_0) \det \bH_{i,\be_i}(\bs_0) \\
+ & = & \det \bH(\bs_0) + (H_{ii}(\bs_1) - H_{ii}(\bs_0)) \det \bH_{i,\be_i}(\bs_0) \\
+ & = & \det \bH(\bs_0) \, (1 + \Delta \lambda_{a_i} \det ( \bH_{i,\be_i}(\bs_0) \cdot \bH(\bs_0)^{-1} )) \\
+ & = & \det \bH(\bs_0) \, (1 + \Delta\lambda_{a_i} J(\bs_0)_{ii}) 
+\end{eqnarray}
+where we made use of $\det \bH_{i,\be_i}(\bs_0) / \det \bH(\bs_0) = \det (\bH_{i,\be_i}(\bs_0) \cdot \bH(\bs_0)^{-1})$
+and the product of these matrices is the unity matrix with the $i$-th diagonal element replaced by $J(\bs_0)_{ii}$.
+
+\section{Proof of~(\ref{eq:prob-deriv})}
+\label{app:prob-deriv}
+
+We have
+\begin{equation}
+P(x|\lambda)=\frac{1}{Z_\lambda} e^{-\lambda f(x)} \;\;\;\mbox{ and }\;\;\; Z_\lambda=\int e^{-\lambda f(x)} dx\; .
+\end{equation}
+Then
+\begin{eqnarray}
+\pd{\lambda} P(x|\lambda)
+ & = & -\frac{e^{-\lambda f(x)}}{Z_\lambda^2} \, \pd{\lambda} Z_\lambda + \frac{1}{Z_\lambda} \pd{\lambda} e^{-\lambda f(x)} \\
+ & = & +\frac{e^{-\lambda f(x)}}{Z_\lambda} \, \frac{\int f(x) e^{-\lambda f(x)} dx}{Z_\lambda} + \frac{-f(x) e^{-\lambda f(x)}}{Z_\lambda} \\
+ & = &  \left[ \langle f(x) \rangle_{P(x|\lambda)} - f(x) \right] P(x|\lambda)\; .
+\end{eqnarray}
+
+
+{\small
+
+\clearpage
+\section{Proof of Equation (91)}
+
+Because
+\begin{equation}
+Z_{\lambda_N} = \int e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2} d\bI
+\end{equation}
+does not depend on $\bPhi$, we have
+\begin{eqnarray}
+\pd{\lambda_N} P(\bI|\ba,\params) & = & \frac{1}{Z_{\lambda_N}} \pd{\lambda_N} e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2} \\
+ & = & \frac{1}{Z_{\lambda_N}} \lambda_N \left[\bI-\bPhi\ba \right]\ba^T  e^{-\frac{\lambda_N}{2}|\bI-\bPhi\ba|^2} \\
+ & = & \lambda_N \left[\bI-\bPhi\ba \right]\ba^T P(\bI|\ba,\params)
+\end{eqnarray}
+
+Details on the derivation of the matrizes are:
+\[
+|I-\Phi a|^2 \; = \; (I-\Phi a)^T (I - \Phi a)
+             \; = \; I^T I \, - \, I^T \Phi a \, - \, \underbrace{(\Phi a)^T I}_{\underbrace{a^T \Phi^T I}_{I^T (a^T \Phi^T)^T}} \, + \, (\Phi a)^T (\Phi a)
+             \; = \; I^T I \, - \, 2 \cdot I^T \Phi a \, + \, a^T \Phi^T \Phi a
+\]
+and
+\[
+\frac{\partial}{\partial \Phi} (a^T \Phi^T \Phi a) \; = \; 2 \cdot \Phi (a a^T)
+\]
+and
+\[
+\frac{\partial}{\partial \Phi} I^T \Phi a \; = \; I \, a^T
+\]
+{\tiny Quelle: Helmut L{\"u}tkepohl, Handbook of Matrices. Wiley 1997, ISBN 0471966886;0471970158(pbk.).\\
+       Stat.Bib. Signature: Ml l{\"u}t; page 179}
+
+}
+
+
+\end{document}

@@ -1,0 +1,125 @@
+global {
+ iter         0
+ areas        3
+ mult         1
+
+ d "/tmp/coco"
+}
+
+all {
+ /**default area size**/
+ d_a          15
+ d_b          1
+}
+
+area 0 {
+ d_a          15
+ d_b          1
+}
+
+area 1 {
+ d_a          15
+ d_b          1
+}
+
+
+/**This creates Fig.6a) of:
+   "A Self-Organizing Map of Sigma-Pi Units",
+   C. Weber and S. Wermter, S., Neurocomputing, 2006/7 (in press).
+
+   R_0 and R_1 are the network inputs; e.g. R_0 is visually perceived object position, R_1 is the viewing direction of the eyes.
+      Each are at two different times, time 0, 1. These are differernt "viewing angles" belonging to one body-centered position.
+   S_2 is the map activation (after winner finding); only needed for one of the data instances ("viewing angle"), e.g. time 0.
+   w_2_0 are the sigma-pi weights: for each neuron (square), vertical is area 0 input, horizontal is area 1 input.
+**/
+
+set rlen         2           /**2**/
+set timescale    1           /**inverse of (rlen-1) (if total_fit_gauss used 1ce**/
+set import       0           /**0 if initial learning**/
+
+set trainiter    300000      /**50000**/
+set export       1           /**occurs only in train; weights and thresholds**/
+set itercut      325000
+
+set sigmas 8.0+3.5+0.00001   /**neighbourhood interaction widths**/
+set stones 33000+200000      /**the times at which the 2nd and 3rd neighbourhood interaction width values are reached**/
+
+
+series (1) {
+ if  ($import = 0)
+ sw (0; 1; alltime) {
+  2(n) {N,w; weight_sigpi_alloc_full    ;0,1; , ; -0.1+0.1}    /*only extra-area multiplicative interactions*/
+ }
+ if  ($import)
+ sw (0; 1; alltime) {
+  2(n) {N,w+d; weight_sigpi_alloc_import; 0,1; , ;    }
+ }
+}
+
+
+/**instead of winner-finding based on max response, use this to find winner based on min distance to data**
+  2(o) {P,w; weight_sigpi_euclid; 0, 1 ; R, R  ; }
+  2(t) {S  ; total_neigh_winner;       ; Q     ; -1, $sigmas, $stones, 0.2}
+**/
+
+
+
+/**TRAIN**/
+
+series ($trainiter) {
+
+ /**presentation of the data; supplies two instances of data, one at time 0 and one at time 1**/
+ sw (0; $rlen; alltime) {
+  0(n) {T  ; data_gauss_3areas_2D;     ;       ; 1,  0,   0.5,  1.0,     2, 0.5}
+  1(n) {T  ; data_gauss_3areas_2D;     ;       ; 0,  1,   0.5,  1.0}
+  2(n) {T  ; data_gauss_3areas_2D;     ;       ; 0,  2,   0.5,  1.0}
+ }                                             /*new area sigma height mode stretch*/
+ sw (0; $rlen; order) {
+  0(t) {R  ; total_normalize   ;       ; T     ; 1.0}
+  1(t) {R  ; total_normalize   ;       ; T     ; 1.0}
+ }
+
+ sw (0; 1; order) {
+  2(o) {P,w; weight_sigpi_feed ; 0, 1  ; R, R  ;    }              /**map activation needed only at time (data instance) 0**/
+  2(t) {R  ; total_winner      ;       ; P     ; 1  }   /**for observe**/
+ }
+ sw (1; 2; order) {                                     /**only for observe:    test how other data instance activates map**/
+  2(o) {O,w; weight_sigpi_feed ; 0, 1  ; R, R  ;    }   /**only for observe:   if Q_2=R_2, then same winner for both views**/
+  2(t) {Q  ; total_winner      ;       ; O     ; 1  }   /**only for observe:                            (i.e. well learnt)**/
+ }
+ sw (1; $rlen; order) {
+  2(o) {P  ; single_copy       ;       ;       ; -1 }   /**map activation for postsynaptic learning value S is from time 0**/
+  2(t) {S  ; total_fit_gauss   ;       ; P     ; $sigmas, $sigmas, $stones, $timescale, 1, 15.1}       /**find soft winner**/
+  2(t) {S  ; total_normalize   ;       ;       ; 1.0}
+  2(o) {N,w; weight_sigpi_kohonen; 2, 0, 1; S, R, R; 0.01}                   /**the presynaptic values (R) are from time 1**/
+ }
+
+ if  (iter > $itercut)
+ sw (0; 1; order) {
+  if  (iter % 1000)
+  2(o) {N,w ; weight_sigpi_cutsmall; 0,1; ,      ; 0, 1+0.1}
+ }
+
+
+ /**write to files**/
+ if  (iter % 1000)
+ sw (0; $rlen; alltime) {
+  0(n) {T,d; observe_phase; ; ;  }                       /**data**/
+  0(n) {R,d; observe_phase; ; ;  }                       /**data**/
+  1(n) {T,d; observe_phase; ; ;  }                       /**data**/
+  1(n) {R,d; observe_phase; ; ;  }                       /**data**/
+  2(n) {T,d; observe_phase; ; ;  }                       /**data, not used (could be used for supervised learning)**/
+  2(n) {S,d; observe_phase; ; ;  }                       /**"majority vote" (Gaussian) used for learning**/
+  2(n) {P,d; observe_phase; ; ;  }                       /**map input before taking soft-winner**/
+  2(n) {Q,d; observe_phase; ; ;  }                       /**the map activation (hard winner) from view at time 1**/
+  2(n) {R,d; observe_phase; ; ;  }                       /**          "             "             "            0**/
+ }
+
+ if  (iter % 1000)
+ sw (0; 1; alltime) {
+  2(n) {N,w  ; weight_sigpi_histogram; 0, 1; , ; 10}
+  if  ($export)
+  2(n) {N,w+d; weight_sigpi_export; 0, 1; ,  ; 6   }
+ }
+
+}

@@ -1,0 +1,159 @@
+Content-Type: text/enriched
+Text-Width: 70
+
+global {
+
+ iter         0
+
+ areas        1
+
+ mult         1
+
+
+ <x-color><param>blue</param>d "/tmp/coco"</x-color>
+}
+
+
+all {
+
+ <x-color><param>DimGrey</param>/**default area size**/</x-color>
+
+ d_a          4
+
+ d_b          14
+
+}
+
+
+
+<x-color><param>DimGrey</param>/**This file implements a one-layer associator network with continuos neurons.
+
+
+   At each instant of the series, the following is done:
+
+   Presentation:   Data are written to the variable T over the whole relaxation time length, i.e. from </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param> to </x-color><x-color><param>red</param>rlen</x-color><x-color><param>DimGrey</param>.
+
+   Initialization: Only at the beginning (time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>), the network activations R are initialized with the data.
+
+   Relaxation:     The network activations R develop freely (NO influence by the data!).
+
+                   Note: if order of second stay is </x-color><x-bg-color><param>Pink</param>o</x-bg-color><x-color><param>DimGrey</param> or </x-color><x-bg-color><param>Pink</param>s</x-bg-color><x-color><param>DimGrey</param>, at each time all neurons are updated, no need for {R;feed_copy;;;-1}.
+
+                   If order is </x-color><x-bg-color><param>Pink</param>r</x-bg-color><x-color><param>DimGrey</param>, then some neurons may not be updated, so first use {R;feed_copy;;;-1} to take over activations!
+
+   Learning:       Only now, the activations R are again compared to the data T.
+
+                   A difference rule moulds the weights so that the activations of the network shall develop like the data.
+
+   Write out:      Ater every 100 iterations (argument to series), an example relaxation (T and R; also weights) will be exported.
+
+
+   The patterns which have to be memorized are produced in data_gauss_move. See what it does in the file src/data.made.c.
+
+**/</x-color>
+
+
+<x-color><param>red</param>set rlen 15</x-color>
+
+<x-color><param>DarkGreen</param>set epsW 0.1</x-color>
+
+<x-color><param>DarkGreen</param>set epsWtimesdecW 0.0001</x-color>
+
+
+
+series (1) {
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>0(n) {N,w; weight_list_alloc_full;   ;   ; -0.1+0.1}</x-color>
+
+ }
+
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; order) {
+
+  <x-color><param>DarkGreen</param>0(o) {N,w; weight_list_cutself   ;   ;   ;    }</x-color>
+
+ }
+
+}
+
+
+
+series (200000) {
+
+ <x-color><param>DimGrey</param>/**presentation of the data**/</x-color>
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; alltime) {
+
+  0(n) {T  ; data_gauss_move  ;     ;     ; 1,  1.0,  1.18,  1.0+-1.0} <x-color><param>DimGrey</param>/**<<-- upper "hill" moves 1 pixel to the right at each time step**/</x-color>
+ }                                        <x-color><param>DimGrey</param>/*new sigma height upper,lower velocity*/</x-color>
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; order) {
+
+  0(o) {T  ; local_sum_const  ; ,   ; ,   ; 0.02 }
+
+ }
+
+ <x-color><param>DimGrey</param>/**initialisation**/</x-color>
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; order) {
+
+  0(o) {R  ; local_copy       ; ,   ; T,  ;      }      <x-color><param>DimGrey</param>/**copy the data from T to activations R (once only at time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>)**/</x-color>
+
+       <x-color><param>DarkGreen</param>{N,w; weight_list_decay;     ;     ; $epsWtimesdecW}</x-color>
+
+ }
+
+ <x-color><param>DimGrey</param>/**relaxation**/</x-color>
+
+ sw (<x-color><param>red</param>1</x-color>; <x-color><param>red</param>$rlen</x-color>; order) {
+
+  0(o) {R  ; single_copy      ;     ;     ; <x-color><param>red</param>-1</x-color> }        <x-color><param>DimGrey</param>/**only necessary, if order of next stay is </x-color><x-bg-color><param>Pink</param>r</x-bg-color><x-color><param>DimGrey</param>, for the not-updated neurons**/</x-color>
+
+  0(<x-bg-color><param>Pink</param>o</x-bg-color>) {R,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed ;     ;     ; <x-color><param>red</param>-1</x-color> }        <x-color><param>DimGrey</param>/**fan-in into the neurons the activations from </x-color><x-color><param>red</param>-1</x-color><x-color><param>DimGrey</param> time step before**/</x-color>
+
+  0(<x-bg-color><param>Pink</param>o</x-bg-color>) {R  ; local_mean_01    ; ,   ; ,   ; 50+1+0+0+1} <x-color><param>DimGrey</param>/**logistic sigmoid transfer function, thus continuous rate coding neurons**/</x-color>
+
+ }
+
+ <x-color><param>DimGrey</param>/**learning**/</x-color>
+
+ sw (<x-color><param>red</param>1</x-color>; <x-color><param>red</param>$rlen</x-color>; order) {
+
+  0(o) {S  ; local_sub        ; ,   ; T, R;    }        <x-color><param>DimGrey</param>/**post-synaptic term for the Hebb rule: target T - activation R**/</x-color>
+       {L  ; single_copy      ;     ; R   ; <x-color><param>red</param>-1</x-color> }        <x-color><param>DimGrey</param>/**pre -synaptic term for the Hebb rule: activation </x-color><x-color><param>red</param>-1</x-color><x-color><param>DimGrey</param> time step before**/</x-color>
+ <x-color><param>DarkGreen</param> 0(o) {N,w; weight_list_hebb ; ,   ; S, L; $epsW}</x-color>
+
+ }
+
+
+ if  (iter % 3000)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; order) {
+
+  if  (iter << 100000)
+
+  <x-color><param>DarkGreen</param>0(o) {N,w; weight_list_cutsmall;  ;     ; 0, 0.1+0.1}</x-color>
+
+ }
+
+
+ <x-color><param>DimGrey</param>/**write to files**/</x-color>
+
+ if  (iter % 500)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; alltime) {
+
+  0(n) {T,<x-color><param>blue</param>d</x-color>; observe_act; ; ;  }                        <x-color><param>DimGrey</param>/**data**/</x-color>
+
+  0(n) {R,<x-color><param>blue</param>d</x-color>; observe_act; ; ;  }                        <x-color><param>DimGrey</param>/**neuronal activations**/</x-color>
+
+  0(n) {S,<x-color><param>blue</param>d</x-color>; observe_act; ; ;  }                        <x-color><param>DimGrey</param>/**difference S=T-R**/</x-color>
+
+  0(n) {N,<x-color><param>DarkGreen</param>w</x-color>+<x-color><param>blue</param>d</x-color>; weight_list_export;   ;   ;    }         <x-color><param>DimGrey</param>/**ignores $rlen**/</x-color>
+
+ }
+
+}
+

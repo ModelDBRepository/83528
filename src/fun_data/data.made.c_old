@@ -1,0 +1,1637 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <math.h>
+
+#include "iter.h"
+#include "series.h"
+#include "utils.h"
+#include "data.h"
+#include "local.h"     /**only for the hacked procedure "data_rand_gibbs_01"**/
+#include "num_recs.h"  /**for poidev in data_zhang**/
+
+
+/******************************** add_a_line *********************************/
+/* Used for init_lines_hier/mixed. Puts one line into a square vector.       */
+
+void add_a_line (double *vec, int ho_a, int br_b, int ori, int offset,
+                 int linestyle, double pixel_prob, double lum) {
+    int j;
+
+    /**draw line along fast counting index **/
+    if  (ori == 0)
+        for (j = 0; j < br_b; ++j)
+        if  (drand48() < pixel_prob) {
+            vec[offset * br_b + j] += lum;
+            if  (linestyle >= 2)
+             vec[((offset+1) * br_b) % (ho_a*br_b) + j] -= lum;
+        }
+
+    /**draw line along slow counting index **/
+    if  (ori == 1)
+        for (j = 0; j < ho_a; ++j)
+        if  (drand48() < pixel_prob) {
+            vec[j * br_b + offset] += lum;
+            if  (linestyle >= 2)
+                vec[j * br_b + (offset+1) % br_b] -= lum;
+        }
+
+    if  (ori == 2)
+        for (j = 0; j < ho_a; ++j)
+        if  (drand48() < pixel_prob) {
+            vec[(offset * br_b + j * (1 + br_b))
+                % (ho_a * br_b)] += lum;
+            if  (linestyle >= 2)
+                vec[((offset + 1) * br_b + j * (1 + br_b))
+                    % (ho_a * br_b)] -= lum;
+        }
+
+    if  (ori == 3)
+        for (j = 0; j < ho_a; ++j)
+        if  (drand48() < pixel_prob) {
+            double sign = linestyle == 3 ? -1.0 : 1.0;
+            vec[(offset * br_b + (-j + br_b) % br_b
+                 + j * br_b) % (ho_a * br_b)] += lum * sign;
+            if  (linestyle >= 2)
+                vec[((offset + 1) * br_b + (-j + br_b) % br_b
+                    + j * br_b) % (ho_a * br_b)] -= lum * sign;
+        }
+}
+
+
+/******************************** set_lines_scaffold *************************/
+/* Used for init_lines_hier/mixed. Sets array 'line_is_set' to 0's and 1's.  */
+
+void set_lines_scaffold (int *line_is_set, double mean_anz_lines, int ho_a) {
+
+    int offset;
+
+    /**set the scaffold vector 'line_is_set[]'**/
+    if  (mean_anz_lines == -1.0) {         /**exactly one line is on**/
+        for (offset = 0; offset < ho_a; ++offset)
+            line_is_set[offset] = 0;
+        line_is_set[(int)(drand48() * (double)(ho_a))] = 1;
+    }
+    if  (mean_anz_lines == -2.0) {           /**only if linestyle==3**/
+        for (offset = 0; offset < ho_a; ++offset)
+            line_is_set[offset] = 0;
+        line_is_set[(int)(drand48() * (double)(ho_a / 2)) * 2] = 1;
+    }
+    if  (mean_anz_lines >= 0.0) {             /**usually**/
+        for (offset = 0; offset < ho_a; ++offset)
+            line_is_set[offset]
+            = (drand48() < mean_anz_lines / (double)(ho_a)) ? 1 : 0;
+    }
+}
+
+
+/******************************** init_lines_hier ****************************/
+/* q[0][0] (cmd->offset) != 0.0 -> get new orientations                      */
+/* q[1][0] (aux1) = no. of ori's                                             */
+/* q[2][0] (aux2) = avrg no. of ori's; if -1 => exactly one ori is ON.       */
+/* q[3][0] (aux3) = avrg no. of lines; if -1 => exactly one line is ON.      */
+/* q[4][0] (aux4) =1: positive lines; =2: double +1/-1 line => mean zero     */
+/*                =3: double +1/-1 line on every second pixel <- even pixels!*/
+/*                !! double-lines are +1/-1 but not -1/+1 !!                 */
+/* q[5][0] pixel probability                                                 */
+/* q[6][0] fluctuation                                                       */
+/* q[7][0] =0: quadratic input; =1: teacher values                           */
+
+void init_lines_hier (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int ori, offset = 0, j, i, ct_t;
+    double *vec;
+    double lum = 1.0;  /**brightness of the lines**/
+    double rd;
+
+    static int firsttime = 1;
+    static int *ori_is_set;
+    static int *line_is_set;
+    static int *line_is_new;
+
+    const int    dummy          = (cmd->anz_quantums == 8) ? 0 :
+                 fprintf (stderr, "\n8 parameters for init_lines_hier, please! (second-last is new: fluctuation!)\n");
+
+    const int    get_new_ori    =      cmd->quantum[0][0] == 0.0 ? 0 : 1;
+    const int    max_anz_ori    = (int)cmd->quantum[1][0];
+    const double mean_anz_ori   =      cmd->quantum[2][0];
+          double mean_anz_lines =      cmd->quantum[3][0];
+    const int    linestyle      = (int)cmd->quantum[4][0];
+    const double pixel_prob     =      cmd->quantum[5][0];
+    const double fluctuation    =      cmd->quantum[6][0];
+    const int    teacher        = (int)cmd->quantum[7][0];
+
+    int ho_a = z->d_a;
+    int br_b = z->d_b;
+
+    /**allocate mem for target values**/
+    if  (firsttime) {
+        ori_is_set  = i_vector (max_anz_ori);
+        line_is_set = i_vector (ho_a >= br_b ? ho_a : br_b);
+        line_is_new = i_vector (ho_a >= br_b ? ho_a : br_b);
+        firsttime = 0;
+    }
+
+    /**get new orientation(s)**/
+    if  (get_new_ori) {
+
+        if  (mean_anz_ori == -1.0) {
+
+            rd = drand48();
+
+            /**one and only one orientation is on each time**/
+            for (ori = 0; ori < max_anz_ori; ++ori) {
+                ori_is_set[ori] = 0;
+                if  (  (rd > (double)(ori)     / (double)max_anz_ori)
+                    && (rd < (double)(ori + 1) / (double)max_anz_ori))
+                    ori_is_set[ori] = 1;
+            }
+        } else {
+            /**choose orientation (one of max_anz_ori = 2, 3 or 4)**/
+            for (ori = 0; ori < max_anz_ori; ++ori)
+                /**each ori with prob mean_anz_ori/max_anz_ori (mean~1..<2)**/
+                if  (drand48() < mean_anz_ori / (double)max_anz_ori)
+                    ori_is_set[ori] = 1;
+                else
+                    ori_is_set[ori] = 0;
+        }
+    }
+
+
+
+    /**paint the image**/
+    if  (teacher == 0) {
+
+        if  (ho_a != br_b)
+            fprintf (stderr,"\nwrong input sizes 0 for init_lines!%d\n",dummy);
+
+        if  (linestyle == 3)
+            if  ((ho_a % 2 != 0) || (br_b % 2 != 0))
+                fprintf (stderr, "\ninit_lines_hier wants even size here\n");
+
+        if  (linestyle == 3)
+            mean_anz_lines *= 2.0;     /**because lines only every 2nd pixel**/
+
+        for (ct_t = begin; ct_t < end; ++ct_t) {
+
+            vec = cmd->S_target[ct_t];
+
+            /**init with 0**/
+            for (j = 0; j < ho_a * br_b; ++j)
+                vec[j] = 0.0;
+
+            for (ori = 0; ori < max_anz_ori; ++ori)
+            if  (ori_is_set[ori]) {
+
+                if  (ct_t == begin)
+                    set_lines_scaffold (line_is_set, mean_anz_lines, ho_a);
+
+                /**slowly changing line scaffold**/
+                if  (fluctuation != 0.0) {
+                    set_lines_scaffold (line_is_new, mean_anz_lines, ho_a);
+
+                    for (offset = 0; offset < ho_a; ++offset)
+                        if  (drand48 () < fluctuation)
+                            line_is_set[offset] = line_is_new[offset];
+                }
+
+                /**choose offset**/
+                offset = 0;
+                while (offset < ho_a) {
+
+                    /**each offset with prob mean_anz_lines/Ho_a**/
+                    if  (line_is_set[offset])
+
+                        add_a_line (vec, ho_a, br_b, ori, offset, linestyle, pixel_prob, lum);
+
+                    offset += 1;
+                    if  (linestyle == 3)
+                        offset += 1;
+                }
+            }
+        }
+    }
+
+
+    /**fill teacher values**/
+    if  (teacher == 1) {
+
+        vec = cmd->S_target[begin];
+
+        if  (br_b != max_anz_ori)
+            fprintf (stderr, "\nwrong input sizes 1 for init_lines!\n");
+
+        for (j = 0; j < br_b; ++j)
+            for (i = 0; i < ho_a; ++i) /**fill redundantly along ho_a**/
+                if  (ori_is_set[j])
+                    vec[br_b * i + j] = lum;
+                else
+                    vec[br_b * i + j] = 0.0;
+
+        /**copy to all times**/
+        for (ct_t = begin + 1; ct_t < end; ++ct_t)
+            for (j = 0; j < ho_a * br_b; ++j)
+                cmd->S_target[ct_t][j] = vec[j];
+    }
+}
+
+
+/******************************** init_lines_mixed ***************************/
+/* q[0][0] (cmd->offset) == 1/-1 -> get new orientations                     */
+/* q[1][0] (aux1) = no. of ori's                                             */
+/* q[2][0] (aux2) = avrg no. of lines for 90 and 135 deg.    (later!!!)      */
+/* q[3][0] (aux3) = avrg no. of lines for  0 and  45 deg.        "           */
+/* q[4][0] (aux4) =1: positive lines; =2: second, negative line =>mean zero  */
+/*                    !!double-lines are both -1/+1 and +1/-1 in one image!! */
+/* ..                                     ..                                 */
+/* .. 2 params less w.r.t init_lines_hier ..                                 */
+/* ..                                     ..                                 */
+/* q[5][0] (cmd->n_from[0]) == 0 -> draws lines on quadratic input           */
+/*          cmd->n_from[0] == 1 -> teacher values: pixel no. "ori" is/are ON */
+
+void init_lines_mixed (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int ori, offset, j, ct_t, drawline;
+    double *vec;
+    double lum = 1.0;  /**brightness of the lines**/
+
+    const int    dummy          = (cmd->anz_quantums == 6) ? 0 :
+                 fprintf (stderr, "\n6 parameters for init_lines_mixed!\n");
+
+    const int    max_anz_ori    = (int)cmd->quantum[1][0];
+    const double anz_0_45       =      cmd->quantum[2][0];
+    const double anz_90_135     =      cmd->quantum[3][0];
+    const int    linestyle      = (int)cmd->quantum[4][0];
+    const int    halfretina     = (int)cmd->quantum[5][0];
+    const double pixel_prob     = 1.0;
+
+    int ho_a = z->d_a;
+    int br_b = z->d_b;
+
+    vec = cmd->S_target[begin];
+
+    /**paint the image**/
+    {
+        if  (ho_a < br_b)
+            fprintf (stderr,"\nError %d in init_lines: lines are drawn up to br_b. Therefore don't make ho_a smaller!\n", dummy);
+
+        /**init with 0**/
+        for (j = 0; j < ho_a * br_b; ++j)
+            vec[j] = 0.0;
+
+        for (ori = 0; ori < max_anz_ori; ++ori)
+
+            /**choose offset**/
+            for (offset = 0; offset < br_b; ++offset) {                                              /**<-- lines not drawn beyond br_b**/
+
+                if  (ori < max_anz_ori / 2)
+                    drawline = (drand48() < anz_0_45 / (double)(br_b)) ? 1 : 0;                      /**<-- br_b determines the probability**/
+                else
+                    drawline = (drand48() < anz_90_135/(double)(br_b)) ? 1 : 0;                      /**<--            "                   **/
+
+                if  (drawline) {
+                if  (halfretina == 0) {
+
+                    add_a_line (vec, ho_a, br_b, ori, offset, linestyle, pixel_prob, lum);
+
+                } else {
+
+                    if  (ori == 0)
+                        for (j = 0; j < br_b / 2; ++j) {
+                            vec[(offset * br_b + j * (1 + br_b))
+                                % (ho_a * br_b)] += lum;
+                            if  (linestyle == 2)
+                                vec[((offset + 1) * br_b + j * (1 + br_b))
+                                    % (ho_a * br_b)] -= lum;
+                        }
+
+                    if  (ori == 1)
+                        for (j = 0; j < br_b / 2; ++j) {
+                            vec[(offset * br_b + (j + br_b) % br_b - j * br_b
+                                + ho_a * br_b) % (ho_a * br_b)] += lum;
+                            if  (linestyle == 2)
+                                vec[((offset + 1) * br_b + (-j + br_b) % br_b
+                                     + j * br_b) % (ho_a * br_b)] -= lum;
+                        }
+
+                    if  (ori == 2)
+                        for (j = br_b / 2; j < br_b; ++j) {
+                            vec[(offset * br_b + j * (1 + br_b))
+                                % (ho_a * br_b)] += lum;
+                            if  (linestyle == 2)
+                                vec[((offset + 1) * br_b + j * (1 + br_b))
+                                    % (ho_a * br_b)] -= lum;
+                        }
+
+                    if  (ori == 3)
+                        for (j = br_b / 2; j < br_b; ++j) {
+                            vec[(offset * br_b + (j + br_b) % br_b - j * br_b
+                                + ho_a * br_b) % (ho_a * br_b)] += lum;
+                            if  (linestyle == 2)
+                                vec[((offset + 1) * br_b + (-j + br_b) % br_b
+                                     + j * br_b) % (ho_a * br_b)] -= lum;
+                        }
+
+                }
+                }
+            }
+    }
+
+
+    /**no teacher values**/
+
+    /**copy to all times**/
+    for (ct_t = begin + 1; ct_t < end; ++ct_t)    /**to make a new data point at every ct_time: (i) put this loop to the beginning and (ii) last "}" to end**/
+        for (j = 0; j < ho_a * br_b; ++j)
+            cmd->S_target[ct_t][j] = vec[j];
+}
+
+
+/******************************** init_lines_sparse **************************/
+/* Lines with sparse luminosity. ICA does not work (too few dimensions?).    */
+/* q[0][0] == 1/-1 -> get new orientations                                   */
+/* q[1][0] = no. of ori's                                                    */
+
+void init_lines_sparse (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int ori, offset, j, ct_t;
+    double *vec;
+    double lum = 1.0;  /**brightness of the lines**/
+
+    const int    dummy          = (cmd->anz_quantums == 2) ? 0 :
+                 fprintf (stderr, "\n2 parameters for init_lines_sparse!\n");
+
+    const int    max_anz_ori    = (int)cmd->quantum[1][0];
+
+    int ho_a = z->d_a;
+    int br_b = z->d_b;
+
+    vec = cmd->S_target[begin];
+
+
+    /**paint the image**/
+    {
+        if  (ho_a != br_b)
+            fprintf (stderr,"\nwrong input sizes 0 for init_lines%d!\n",dummy);
+
+        /**init with 0**/
+        for (j = 0; j < ho_a * br_b; ++j)
+            vec[j] = 0.0;
+
+        for (ori = 0; ori < max_anz_ori; ++ori)
+
+            /**choose offset**/
+            for (offset = 0; offset < ho_a; ++offset) {
+
+                double c = 10.0;
+
+                do  {
+                    lum = 200.0 * drand48 () - 100.0;
+                } while (drand48 () > exp (-1.0 * exp (log (fabs (lum) / c))));
+                lum /= 50.0;
+
+                /**draw line along fast counting index **/
+                if  (ori == 0)
+                    for (j = 0; j < br_b; ++j)
+                        vec[offset * br_b + j] += lum;
+
+                /**draw line along slow counting index **/
+                if  (ori == 2)
+                    for (j = 0; j < ho_a; ++j)
+                        vec[j * br_b + offset] += lum;
+
+                if  (ori == 3)
+                    for (j = 0; j < ho_a; ++j)
+                        vec[(offset * br_b + j * (1 + br_b))
+                            % (ho_a * br_b)] += lum;
+
+                if  (ori == 1)
+                    for (j = 0; j < ho_a; ++j)
+                        vec[(offset * br_b + (-j + br_b) % br_b
+                             + j * br_b) % (ho_a * br_b)] += lum;
+            }
+    }
+
+
+    /**no teacher values**/
+
+    /**copy to all times**/
+    for (ct_t = begin + 0; ct_t < end; ++ct_t)
+        for (j = 0; j < ho_a * br_b; ++j)
+            cmd->S_target[ct_t][j] = vec[j];
+}
+
+
+
+
+/******************************** init_points ********************************/
+/* Points with sparse luminosity. ICA works here.                            */
+/* q[0][0] = 1/-1 -> get new points.                                         */
+/* q[1][0] =0: pos&neg values; =1: only pos values.                          */
+
+void init_points (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int j, ct_t;
+    double *vec;
+    double lum;
+
+    int ho_a = z->d_a;
+    int br_b = z->d_b;
+
+    if  (cmd->anz_quantums != 2)
+        fprintf (stderr, "\n2 parameters for init_points!\n");
+
+    vec = cmd->S_target[begin];
+
+
+    /**paint the image**/
+    {
+        /**init with 0**/
+        for (j = 0; j < ho_a * br_b; ++j) {
+
+            double c = 10.0;
+
+            do  {
+                lum = 200.0 * drand48 () - 100.0;
+            } while (drand48 () > exp (-1.0 * exp (log (fabs (lum) / c))));
+
+            vec[j] = lum / 50;
+
+            if  (cmd->quantum[1][0] == 1)
+                vec[j] = fabs (vec[j]);
+        }
+    }
+
+/***
+    for (j = 0; j < ho_a - 2; j += 2) {
+        int i;
+        for (i = 0; i < br_b - 2; i += 2) {
+            vec[j*br_b + (i+1)] = vec[j*br_b + i];
+            vec[(j+1)*br_b + i] = vec[j*br_b + i];
+            vec[(j+1)*br_b + (i+1)] = vec[j*br_b + i];
+        }
+    }
+***/
+
+    /**no teacher values**/
+
+    /**copy to all times**/
+    for (ct_t = begin + 0; ct_t < end; ++ct_t)
+        for (j = 0; j < ho_a * br_b; ++j)
+            cmd->S_target[ct_t][j] = vec[j];
+}
+
+
+
+/******************************** init_burglar *******************************/
+/* q[0][0] = 0 simple training data: 000 011 110 (burglar/alarm/earthquake). */
+/* q[0][0] = 1 training data with probabilistic relations from Frey book.    */
+/* q[0][0] = 2 test stimulus 010.                                            */
+
+void init_burglar (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int j, ct_t;
+    double *vec;
+    int burglar = 0;
+    int earthquake = 0;
+
+    if  (z->d_a * z->d_b != 3)
+        fprintf (stderr, "\nwrong area size for init_burglar!\n");
+
+    if  (cmd->anz_quantums != 1)
+        fprintf (stderr, "\n1 parameter for init_burglar!\n");
+
+    vec = cmd->S_target[begin];
+
+
+    if  (drand48 () < 0.1)
+        burglar = 1;
+
+    if  (drand48 () < 0.1)
+        earthquake = 1;
+
+    vec[0] = (double)burglar;
+    vec[1] = 0.0;
+    vec[2] = (double)earthquake;
+
+
+    if  (cmd->quantum[0][0] == 0) { /**simple mode**/
+        if  (burglar || earthquake)
+            vec[1] = 1.0;
+    }
+
+
+    if  (cmd->quantum[0][0] == 1) { /**probs mode  (numbers from Frey, p.31)**/
+
+        if  ((burglar == 0) && (earthquake == 0))
+            if  (drand48 () < 0.001)
+                vec[1] = 1.0;
+
+        if  ((burglar == 1) && (earthquake == 0))
+            if  (drand48 () < 0.368)
+                vec[1] = 1.0;
+
+        if  ((burglar == 0) && (earthquake == 1))
+            if  (drand48 () < 0.135)
+                vec[1] = 1.0;
+
+        if  ((burglar == 1) && (earthquake == 1))
+            if  (drand48 () < 0.607)
+                vec[1] = 1.0;
+    }
+
+
+    if  (cmd->quantum[0][0] == 2) { /**test mode**/
+        vec[0] = 0.0;
+        vec[1] = 1.0;
+        vec[2] = 0.0;
+    }
+
+    /**copy to all times**/
+    for (ct_t = begin + 0; ct_t < end; ++ct_t)
+        for (j = 0; j < 3; ++j)
+            cmd->S_target[ct_t][j] = vec[j];
+}
+
+
+
+/******************************** init_cuecomb *******************************/
+/* Cue combination data. Sets on each of 3 rows of input a point/gaussian.   */
+/* Rows correspond to 0) true depth, 1) motion cue, 2) texture cue.          */
+/* q[0][0] = 0/1/2 training data pixel/gauss / test data.                    */
+/* q[1][0]/q[1][1]/q[1][2] = integral of Gaussians; q[][]<0 => maximum values*/
+/* q[2][0]/q[2][1]/q[2][2] = sigmas of Gaussians.                            */
+/* q[3][0] = position of target; "-1": random position.                      */
+/* q[4][0]/q[4][1] = deviations of stimuli 1 / 2 w.r.t. stimulus 0.          */
+
+void init_cuecomb (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int i, j, ct_t;
+    double *vec;
+    double pos[3], length = (double)(z->d_b);
+    static long int idum[1] = {-1};
+
+    if  (z->d_a != 3)
+        fprintf (stderr, "\nwrong area size for init_cuecomb!\n");
+
+    if  (cmd->anz_quantums != 5)
+        fprintf (stderr, "\n5 parameter blocks for init_cuecomb!\n");
+
+    if  ((cmd->anz_quant[1] != 3) || (cmd->anz_quant[2] != 3) || (cmd->anz_quant[4] != 2))
+        fprintf (stderr, "\nwrong parameters in init_cuecomb!\n");
+
+
+    pos[0] = (cmd->quantum[3][0] == -1.0)
+           ? drand48() * length
+           : cmd->quantum[3][0];
+
+
+    /**for all times, make a new random deviation**/
+    for (ct_t = begin; ct_t < end; ++ct_t) {
+
+        pos[1] = (cmd->quantum[0][0] != 2)     /**random sigma during training, given difference during test**/
+               ? pos[0] + gasdev (idum) * cmd->quantum[4][0]
+               : pos[0] + cmd->quantum[4][0];
+        pos[2] = (cmd->quantum[0][0] != 2)
+               ? pos[0] + gasdev (idum) * cmd->quantum[4][1]
+               : pos[0] + cmd->quantum[4][1];
+
+        for (i = 0; i < 3; ++i) {
+
+            double mu       = pos[i];
+            double sigma    = cmd->quantum[2][i];
+            double normfact;
+
+            if  (cmd->quantum[1][i] > 0.0)
+                normfact = 1.0 / (sqrt (2.0 * M_PI) * sigma);
+            else
+                normfact = -cmd->quantum[1][i];
+
+            vec = cmd->S_target[ct_t] + i * z->d_b;
+
+            for (j = 0; j < z->d_b; ++j)
+                vec[j] = normfact * exp (- (double)((j-mu)*(j-mu))
+                                          /  (2.0 * sigma * sigma));
+
+            /**test condition**/
+            if  (cmd->quantum[0][0] == 2)
+                if  (i == 0)
+                    for (j = 0; j < z->d_b; ++j)
+                        vec[j] = 0.0;
+        }
+    }
+}
+
+
+
+/******************************** data_sub_mean ******************************/
+/* Envelope for sub_mean_vector to be used within data sweep.                */
+
+void data_sub_mean (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t;
+
+    for (ct_t = begin; ct_t < end; ++ct_t)
+
+        sub_mean_vector (cmd->S_target[ct_t], z->d_a * z->d_b);
+}
+
+
+
+/******************************** data_rand_gibbs_01 *************************/
+/* Hacked procedure which treats neurons of one area differently.            */
+
+void data_rand_gibbs_01 (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t, ct_n;
+
+    if  (cmd->anz_quantums != 1)
+        fprintf (stderr, "\nwrong number of quantums in data_rand_gibbs_01\n");
+    if  (cmd->anz_quant[0] != 2)
+        fprintf (stderr, "\nwrong number of quant's in data_rand_gibbs_01\n");
+
+    for (ct_t = begin; ct_t < end; ++ct_t) {
+
+        for (ct_n = 0; ct_n < z->d_a * z->d_b; ++ct_n)
+
+            if  (ct_n < (z->d_a - 1) * z->d_b) {
+
+                double par_zero[] = {0.0};
+
+                cmd->S_target[ct_t][ct_n] = local_const (par_zero, 0.0, 0.0);
+
+            } else {
+
+                cmd->S_target[ct_t][ct_n] = local_rand_gibbs_01 (cmd->quantum[0], 0.0, 0.0);
+            }
+    }
+}
+
+
+
+
+/******************************** data_hack_init_lines ***********************/
+/* Hacked procedure which treats neurons of one area differently.            */
+
+void data_hack_init_lines (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+    int ct_t, ct_n;
+    int chosen = (int)(drand48 () * z->d_b);
+    double sat_val = 1.0;
+
+    for (ct_t = begin; ct_t < end; ++ct_t) {
+
+        for (ct_n = 0; ct_n < z->d_a * z->d_b; ++ct_n)
+
+            if  (ct_n < z->d_b)
+
+                cmd->S_target[ct_t][ct_n] = (ct_n == chosen) ? sat_val : 0.0;
+
+            else
+
+                cmd->S_target[ct_t][ct_n] = 0.0;
+    }
+}
+
+
+
+
+
+/******************************** mk_gabor ***********************************/
+/* Add a Gabor function to 1) array of size 2)3) d_a,d_b at 4)5) pos_a,pos_b.*/
+/* Not used yet. From p/co/bm/src/images.c.                                  */
+
+int mk_gabor (double *arrayvector, int d_a, int d_b,
+              int pos_a, int pos_b, double vol, double sigma,
+              double length, double angle, double phase) {
+
+    int A, B, diffA, diffB;
+    double e_A, e_B, sqdist, directed_dist, normfact;
+    static int firsttime = 1;
+    static double **G;
+
+    if  (firsttime) {
+        G = d_matrix (d_a, d_b);
+        firsttime = 0;
+    }
+
+    /**Einheitsvektor in Richtung der Welle**/
+    e_A = cos (angle);
+    e_B = sin (angle);
+
+    normfact = vol / (2.0 * M_PI * sigma * sigma);
+
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            /**for periodic boundary**/
+            diffA = (A <= d_a / 2) ? A : - d_a + A;
+            diffB = (B <= d_b / 2) ? B : - d_b + B;
+
+            sqdist = (double)(diffA * diffA + diffB * diffB);
+            directed_dist = (double)diffA * e_A + (double)diffB * e_B;
+
+            G[A][B]
+            = normfact * exp (-sqdist / (2.0 * sigma * sigma))
+            * cos (directed_dist * M_PI / length - phase);
+        }
+
+
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            /**for shift**/
+            diffA = (A + pos_a) % d_a;
+            diffB = (B + pos_b) % d_b;
+
+            arrayvector[A * d_b + B] += G[diffA][diffB];
+        }
+
+    return (0);
+}
+
+
+
+int R_init_gabor1 (double *vec, int d_a, int d_b, DATA *d) {
+
+    int    pos_a;           /** 0     <= pos_a  <  d_a                **/
+    int    pos_b;           /** 0     <= pos_b  <  d_b                **/
+    double vol;
+    double sigma;           /** 1.0   <= sigma  <= min(d_a|d_b) / 4.0 **/
+    double length;          /** sigma <= length <~ sigma * 3.0        **/
+    double angle;           /** 0.0   <= angle  <  M_PI               **/
+    double phase;           /** 0.0   <= phase  <  M_PI * 2.0         **/
+
+    double sigmamin, sigmamax;
+    int anz, i;
+
+    sigmamin = 1.0;
+    sigmamin = log (sigmamin);
+    sigmamax = (double)(d_b) * 0.25;
+
+    anz = 1 + (int)(drand48() * 1.0);
+    for (i = 0; i < d_a * d_b; ++i)
+        vec[i] = 0.0;
+
+    for (i = 0; i < anz; ++i) {
+        pos_a  =   (int)(drand48() * (double)(d_a));
+        pos_b  =   (int)(drand48() * (double)(d_b));
+        vol    = 30.0;
+        sigma  = exp (sigmamin + drand48() * (log(sigmamax) - sigmamin));
+        length = sigma + drand48() * sigma * 2.0;
+        angle  =         drand48() * M_PI;
+        phase  =         /*drand48() */ M_PI * 0.5 /* 2.0!!!*/;
+
+        mk_gabor (vec, d_a, d_b, pos_a, pos_b, vol, sigma,
+                  length, angle, phase);
+    }
+
+    return (0);
+}
+
+
+
+/******************************** mk_zeppelin ********************************/
+/* Add elongated Gauss to 1) array of size 2)3) d_a,d_b at 4)5) pos_a,pos_b. */
+/*  ^ not yet. Just set array to this!                                       */
+
+void mk_zeppelin (double *arrayvector, int d_a, int d_b,
+                  double pos_a, double pos_b, double vol,
+                  double sigma1, double sigma2, double angle) {
+
+    int A, B;
+    double diffA, diffB;
+    double sqdist1, sqdist2, diffangle;
+    double normfact = 1.0;
+    static int firsttime = 1;
+    static double **G, **dist, **pixangle;
+    static int d_a_save;
+    static int d_b_save;
+
+    if  (firsttime) {
+        G         = d_matrix (d_a, d_b);
+        pixangle  = d_matrix (d_a, d_b);
+        dist      = d_matrix (d_a, d_b);
+        d_a_save  = d_a;
+        d_b_save  = d_b;
+        firsttime = 0;
+    }
+
+    if  ((d_a != d_a_save) || (d_b != d_b_save))
+        fprintf (stderr, "\nmk_zeppelin can be used with one size only yet\n");
+
+    /**set up a scaffold of dist and pixangle centered around 0**/
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            /**for periodic boundary**/
+            diffA = (A <= d_a / 2) ? (double)(A) : (double)(-d_a + A);
+            diffB = (B <= d_b / 2) ? (double)(B) : (double)(-d_b + B);
+
+            /**move centers away from pixel centers**/
+            /**shift in sub-pixel range only**/
+            diffA += pos_a - (double)((int)(pos_a));
+            diffB += pos_b - (double)((int)(pos_b));
+
+            /**get distance and pixangle for every grid point**/
+            dist[A][B] = diffA * diffA + diffB * diffB;
+            dist[A][B] = sqrt (dist[A][B]);
+            pixangle[A][B] = (diffA == 0) ? 0.5 * M_PI
+                           : atan (diffB / diffA);
+    }
+
+/*!!!
+    normfact = vol / (2.0 * M_PI * sigma1 * sigma2);
+
+    if  ((d_a == 1) || (d_b == 1))
+        normfact = vol / (sqrt (2.0 * M_PI) * sigma1);
+*/
+
+
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            diffangle  = angle - pixangle[A][B];
+            sqdist1    = dist[A][B] * cos (diffangle);
+            sqdist1   *= sqdist1;
+            sqdist2    = dist[A][B] * sin (diffangle);
+            sqdist2   *= sqdist2;
+
+            G[A][B] = normfact * exp (-sqdist1 / (2.0 * sigma1 * sigma1))
+                               * exp (-sqdist2 / (2.0 * sigma2 * sigma2));
+        }
+
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            /**for shift**/
+              arrayvector[A * d_b + B]
+            = G[(A + (int)pos_a) % d_a][(B + (int)pos_b) % d_b];
+        }
+}
+
+
+/******************************** mk_zhang ***********************************/
+/* Adds a zhang-hill to (1) arrayvector.                                     */
+
+void mk_zhang (double *arrayvector, int d_a, int d_b,
+               double pos_a, double pos_b, double zB, double K,
+               int periodic_boundary) {
+
+    int A, B;
+    double diffA, diffB, sub_shift_A, sub_shift_B;
+    double diag = ((d_a == 1) || (d_b == 1))
+                ? d_a + d_b - 1 : sqrt (d_a*d_a + d_b*d_b);
+    double dist;
+    static int firsttime = 1;
+    static double **G;
+    static int d_a_save;
+    static int d_b_save;
+
+    if  (firsttime) {
+        G         = d_matrix (d_a, d_b);
+        d_a_save  = d_a;
+        d_b_save  = d_b;
+        firsttime = 0;
+    }
+
+    if  ((d_a != d_a_save) || (d_b != d_b_save))
+        fprintf (stderr, "\nmk_zhang can be used with one size only yet\n");
+
+    /**set up a scaffold of dist centered around 0**/
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            if  (periodic_boundary) {
+                /**for periodic boundary**/
+                diffA = (A <= d_a / 2) ? (double)(A) : (double)(-d_a + A);
+                diffB = (B <= d_b / 2) ? (double)(B) : (double)(-d_b + B);
+            } else {
+                diffA = (double)(A);
+                diffB = (double)(B);
+            }
+
+            /**move centers away from pixel centers**/
+            /**shift in sub-pixel range only**/
+            sub_shift_A = pos_a - (double)((int)(pos_a));
+            sub_shift_B = pos_b - (double)((int)(pos_b));
+            diffA += sub_shift_A;
+            diffB += sub_shift_B;
+            dist = sqrt (diffA * diffA + diffB * diffB);
+
+            /**because the cos**/
+            dist = dist > (0.5 * diag) ? (0.5 * diag) : dist;
+
+            G[A][B] = zB / exp (K) * exp (K * cos (2.0 * M_PI * dist / diag));
+        }
+
+    for (A = 0; A < d_a; A++)
+        for (B = 0; B < d_b; B++) {
+
+            if  (periodic_boundary) {
+                /**for shift**/
+                arrayvector[A * d_b + B] += G[(A + (int)pos_a) % d_a][(B + (int)pos_b) % d_b];
+            } else {
+                arrayvector[A * d_b + B] += G[abs (A - (int)(pos_a))][abs (B - (int)(pos_b))];
+            }
+        }
+}
+
+
+/******************************** data_zeppelin ******************************/
+
+void data_zeppelin (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t;
+
+    for (ct_t = begin; ct_t < end; ++ct_t) {
+
+        double pos_a  = drand48() * (double)z->d_a;
+        double pos_b  = drand48() * (double)z->d_b;
+        double vol    = 10.0;
+        double sigma1 = 2.0; /* 2.25; */
+        double sigma2 = 0.5; /* 0.75; */
+        double angle  = drand48() * M_PI;
+
+        mk_zeppelin (cmd->S_target[ct_t], z->d_a, z->d_b, pos_a, pos_b, vol,
+                                          sigma1, sigma2, angle);
+    }
+}
+
+
+/******************************** data_gauss *********************************/
+/* Use for 1D or 2D gaussian functions with given parameters.                */
+/* pos_a=q[0][0], pos_b=q[0][1], sigma's=q[1][0], vol=q[2][0].               */
+/* if    q[0][0]=-1  or q[0][1]=-1  then set center to random position.      */
+
+void data_gauss (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t;
+
+    double pos_a  = cmd->quantum[0][0] == -1 ? (int)(drand48() * (double)z->d_a) /*!!!*/
+                                             : cmd->quantum[0][0];
+    double pos_b  = cmd->quantum[0][1] == -1 ? (int)(drand48() * (double)z->d_b) /*!!!*/
+                                             : cmd->quantum[0][1];
+    double sigma1 = cmd->quantum[1][0];
+    double sigma2 = sigma1;
+    double vol    = cmd->quantum[2][0];
+    double angle  = 0.0;
+
+    if  (z->d_a == 1)  pos_a = 0.0;
+    if  (z->d_b == 1)  pos_b = 0.0;
+
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        mk_zeppelin (cmd->S_target[ct_t], z->d_a, z->d_b, pos_a, pos_b, vol,
+                                          sigma1, sigma2, angle);
+}
+
+
+/******************************** data_gauss_nontorus ************************/
+
+void data_gauss_nontorus (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+     int X, Y, ct_t;
+     int    do_new = (int)(cmd->quantum[0][0]);
+     double sigma  = cmd->quantum[1][0];
+     double height = cmd->quantum[2][0];
+     static double cm_x = 0.0;
+     static double cm_y = 0.0;
+
+     if  (do_new) {
+         cm_x = drand48() * (double)(z->d_a);
+         cm_y = drand48() * (double)(z->d_b);
+     }
+
+     for (ct_t = begin; ct_t < end; ++ct_t)
+         for (X = 0; X < z->d_a; ++X)
+             for (Y = 0; Y < z->d_b; ++Y) {
+                 double diffA = X - cm_x;
+                 double diffB = Y - cm_y;
+
+                 cmd->S_target[ct_t][X * z->d_b + Y] = height * exp (-0.5 * (diffA*diffA+diffB*diffB)/(sigma*sigma));
+             }
+}
+
+
+/******************************** data_gauss_move ****************************/
+/* Places a Gaussian randomly on either upper or lower half and moves it.    */
+/* Gaussian is Gaussian only along d_b, but horizontal along d_a.            */
+/* q[0][0] = 0 .. 1 prob to choose a new position at the beginning           */
+/* q[1][0] = sigma of Gaussian                                               */
+/* q[2][0] = height of Gaussian                                              */
+/* q[3][0]/[1] = velocity in upper/lower half (move-dist at each time step)  */
+
+DOUBLE data_gauss_move (PARAMS *x, AREA *A, COMMAND *cmd, int begin, int end) {
+     int X, Y, ct_t;
+     static double cm_x = 0.0;
+     static double cm_y = 0.0;
+     double do_new, sigma, height, vel_upper, vel_lower;
+
+     AREA z = A + cmd->area;
+
+     /**warnings of wrong usage**/
+     if  (cmd->anz_quantums != 4)
+         fprintf (stderr, "\nwrong number of quantums in data_gauss_move\n");
+     if  (cmd->anz_quant[3] != 2)
+         fprintf (stderr, "\nwrong number of quant's in data_gauss_move\n");
+
+     do_new    = cmd->quantum[0][0];
+     sigma     = cmd->quantum[1][0];
+     height    = cmd->quantum[2][0];
+     vel_upper = cmd->quantum[3][0];
+     vel_lower = cmd->quantum[3][1];
+
+     if  (do_new > drand48()) {
+         cm_x = drand48() * (double)(z->d_a);  /**vertical starting position**/
+         cm_y = drand48() * (double)(z->d_b); /*horizontal starting position**/
+     }
+
+     for (ct_t = begin; ct_t < end; ++ct_t) {
+
+         if  (cm_x >= z->d_a / 2)                           /**in lower half**/
+             cm_y += vel_lower;                                      /**move**/
+
+         if  (cm_x < z->d_a / 2)                            /**in upper half**/
+             cm_y += vel_upper;                                      /**move**/
+
+         if  (cm_y >= z->d_b)                    /**if out of right boundary**/
+             cm_y -= (double)z->d_b;                     /**start left again**/
+         if  (cm_y < 0)                           /**if out of left boundary**/
+             cm_y += (double)z->d_b;                    /**start right again**/
+
+         for (X = 0; X < z->d_a; ++X)
+             for (Y = 0; Y < z->d_b; ++Y) {
+               /*double diffA = X - cm_x;*/
+                 double diffB = Y - cm_y;
+
+                 /**for periodic boundary**/
+                 diffB = (fabs(diffB) <= fabs(z->d_b / 2.0)) ? diffB : - z->d_b + fabs(diffB);
+
+                 if  (cm_x >= z->d_a / 2) {
+                     if  (X >= z->d_a / 2)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = height * exp (-0.5 * (/*diffA*diffA+*/diffB*diffB)/(sigma*sigma));
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+
+                 if  (cm_x < z->d_a / 2) {
+                     if  (X < z->d_a / 2)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = height * exp (-0.5 * (/*diffA*diffA+*/diffB*diffB)/(sigma*sigma));
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+             }
+     }
+}
+
+
+/******************************** data_gauss_move3 ***************************/
+/* Places a Gaussian randomly on either upper or lower half and moves it.    */
+/* Gaussian is Gaussian only along d_b, but horizontal along d_a.            */
+/* q[0][0] = 0 .. 1 prob to choose a new position at the beginning           */
+/* q[1][0] = sigma of Gaussian                                               */
+/* q[2][0] = height of Gaussian                                              */
+/* q[3][0]/[1] = velocity in upper/lower half (move-dist at each time step)  */
+/* q[4][0]/[1] = prob of a Gauss in upper vs. lower half vs. none (if sum<1) */
+
+void data_gauss_move3 (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+     int X, Y, ct_t;
+     static int choose = 0;            /**0: only middle; 1: upper; 2: lower**/
+     static double cm_y = 0.0;
+     double do_new, sigma, height, vel_upper, vel_lower, prob_upper, prob_lower;
+
+     /**warnings of wrong usage**/
+     if  (cmd->anz_quantums != 5)
+         fprintf (stderr, "\nwrong number of quantums in data_gauss_move3\n");
+     if  ((cmd->anz_quant[3] != 2) || (cmd->anz_quant[4] != 2))
+         fprintf (stderr, "\nwrong number of quant's in data_gauss_move3\n");
+     if  (z->d_a % 3 != 0)
+         fprintf (stderr, "\nwrong area size in data_gauss_move3\n");
+
+     do_new     = cmd->quantum[0][0];
+     sigma      = cmd->quantum[1][0];
+     height     = cmd->quantum[2][0];
+     vel_upper  = cmd->quantum[3][0];
+     vel_lower  = cmd->quantum[3][1];
+     prob_upper = cmd->quantum[4][0];
+     prob_lower = cmd->quantum[4][1];
+
+     if  (do_new > drand48()) {
+         choose = (drand48() > (prob_upper + prob_lower)) ? 0
+                : (drand48() * (prob_upper + prob_lower) > prob_upper ? 2 : 1);
+         cm_y = drand48() * (double)(z->d_b); /*horizontal starting position**/
+     }
+
+     for (ct_t = begin; ct_t < end; ++ct_t) {
+
+         if  (choose == 2)                                 /**in lower third**/
+             cm_y += vel_lower;                                      /**move**/
+
+         if  (choose == 1)                                 /**in upper third**/
+             cm_y += vel_upper;                                      /**move**/
+
+         if  (cm_y >= z->d_b)                    /**if out of right boundary**/
+             cm_y -= (double)z->d_b;                     /**start left again**/
+         if  (cm_y < 0)                           /**if out of left boundary**/
+             cm_y += (double)z->d_b;                    /**start right again**/
+
+
+         for (X = 0; X < z->d_a; ++X)
+             for (Y = 0; Y < z->d_b; ++Y) {
+                 double diffB = (fabs(Y - cm_y) < z->d_b / 2)
+                              ? (Y - cm_y)
+                              : z->d_b - fabs(Y - cm_y);
+                 double val = height * exp(-0.5 * (diffB*diffB)/(sigma*sigma));
+
+                 if  (choose == 0) {
+                     if  ((X >= z->d_a / 3) && (X < 2 * z->d_a / 3))
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+
+                 if  (choose == 2) {
+                     if  (X >= z->d_a / 3)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+
+                 if  (choose == 1) {
+                     if  (X < 2 * z->d_a / 3)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+             }
+     }
+}
+
+
+/******************************** data_gauss_move4 ***************************/
+/* Places a Gaussian randomly on either upper or lower half and moves it.    */
+/* Gaussian is Gaussian only along d_b, but horizontal along d_a.            */
+/* q[0][0] = 0 .. 1 prob to choose a new position at the beginning           */
+/* q[1][0] = sigma of Gaussian                                               */
+/* q[2][0] = height of Gaussian                                              */
+/* q[3][0]/[1] = velocity in upper/lower half (move-dist at each time step)  */
+/* q[4][0]/[1] = prob of a Gauss in upper vs. lower half vs. none (if sum<1) */
+/* q[5][0]/[1]/[2] = horiz start pos in up/low/mid. rand if -1. Always new!  */ 
+
+void data_gauss_move4 (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+     int X, Y, ct_t;
+     static int choose = 0;            /**0: only middle; 1: upper; 2: lower**/
+     static double cm_y = 0.0;
+     double do_new, sigma, height, vel_upper, vel_lower, prob_upper, prob_lower;
+     double horiz_start_pos;
+
+     /**warnings of wrong usage**/
+     if  (cmd->anz_quantums != 6)
+         fprintf (stderr, "\nwrong number of quantums in data_gauss_move4\n");
+     if  ((cmd->anz_quant[3] != 2) || (cmd->anz_quant[4] != 2))
+         fprintf (stderr, "\nwrong number of quant's in data_gauss_move3\n");
+     if  (z->d_a % 3 != 0)
+         fprintf (stderr, "\nwrong area size in data_gauss_move3\n");
+
+     do_new          = cmd->quantum[0][0];
+     sigma           = cmd->quantum[1][0];
+     height          = cmd->quantum[2][0];
+     vel_upper       = cmd->quantum[3][0];
+     vel_lower       = cmd->quantum[3][1];
+     prob_upper      = cmd->quantum[4][0];
+     prob_lower      = cmd->quantum[4][1];
+     horiz_start_pos = cmd->quantum[5][0];
+
+     if  (do_new > drand48()) {
+         choose = (drand48() > (prob_upper + prob_lower)) ? 0
+                : (drand48() * (prob_upper + prob_lower) > prob_upper ? 2 : 1);
+     }
+
+     if  (horiz_start_pos == -1)
+         cm_y = drand48() * (double)(z->d_b); /*horizontal starting position**/
+     else
+         cm_y = horiz_start_pos;
+
+     for (ct_t = begin; ct_t < end; ++ct_t) {
+
+         for (X = 0; X < z->d_a; ++X)
+             for (Y = 0; Y < z->d_b; ++Y) {
+                 double diffB = (fabs(Y - cm_y) < z->d_b / 2)
+                              ? (Y - cm_y)
+                              : z->d_b - fabs(Y - cm_y);
+                 double val = height * exp(-0.5 * (diffB*diffB)/(sigma*sigma));
+
+                 if  (choose == 0) {
+                     if  ((X >= z->d_a / 3) && (X < 2 * z->d_a / 3))
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+
+                 if  (choose == 2) {
+                     if  (X >= z->d_a / 3)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+
+                 if  (choose == 1) {
+                     if  (X < 2 * z->d_a / 3)
+                         cmd->S_target[ct_t][X * z->d_b + Y] = val;
+                     else
+                         cmd->S_target[ct_t][X * z->d_b + Y] = 0.0;
+                 }
+             }
+
+         /**move after drawing**/
+         if  (choose == 2)                                 /**in lower third**/
+             cm_y += vel_lower;                                      /**move**/
+
+         if  (choose == 1)                                 /**in upper third**/
+             cm_y += vel_upper;                                      /**move**/
+
+         if  (cm_y >= z->d_b)                    /**if out of right boundary**/
+             cm_y -= (double)z->d_b;                     /**start left again**/
+         if  (cm_y < 0)                           /**if out of left boundary**/
+             cm_y += (double)z->d_b;                    /**start right again**/
+     }
+}
+
+/******************************** data_gauss_motor***************************/
+/* Places a Gaussian  randomly on the area and move it either to the left or right */
+/* q[0][0] = 0 .. 1 prob to choose a new position at the beginning          */
+/* q[1][0] = sigma of Gaussian                                               */
+/* q[2][0] = height of Gaussian                                              */
+
+void data_gauss_motor (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+
+     int ct_t, i;
+     static int choose = 0;            /**0: only middle; 1: upper; 2: lower**/
+     static double cm_y = 0.0;
+     double do_new, sigma, height, vel;
+     int     mode;
+
+     /**warnings of wrong usage**/
+     if  (cmd->anz_quantums != 5)
+         fprintf (stderr, "\nwrong number of quantums in data_gauss_move3\n");
+
+     do_new     = cmd->quantum[0][0];
+     sigma      = cmd->quantum[1][0];
+     height     = cmd->quantum[2][0];
+     vel        = cmd->quantum[3][0];
+     mode       = (int)(cmd->quantum[4][0]);
+
+     if  (do_new > drand48()) {
+         choose = (drand48() < 0.5) ? 0 : 1;
+         cm_y = drand48() * (double)(z->d_a * z->d_b);  /*horizontal starting position**/
+     }
+
+     /**write moving Gaussian to angel area**/
+     if  (mode == 0) {
+         for (ct_t = begin; ct_t < end; ++ct_t) {
+             if  (choose == 0)                                 /**right**/
+                 cm_y += vel;                                      /**move**/
+
+             if  (choose == 1)                                 /**left**/
+                 cm_y -= vel;                                      /**move**/
+
+             if  (cm_y >= z->d_a * z->d_b)                    /**if out of right boundary**/
+                 cm_y -= (double)z->d_b;                     /**start left again**/
+             if  (cm_y < 0)                           /**if out of left boundary**/
+                 cm_y += (double)z->d_b;                    /**start right again**/
+
+             for (i = 0; i < z->d_b * z->d_a; ++i) {
+                 double diff = (fabs(i - cm_y) < (z->d_a * z->d_b) / 2)
+                             ? (i - cm_y)
+                             : (z->d_a * z->d_b) - fabs(i - cm_y);
+
+                 cmd->S_target[ct_t][i] = height * exp(-0.5 * (diff*diff)/(sigma*sigma));
+             }
+         }
+     }
+
+     /**write to two left/right-turn motor units**/
+     if  (mode == 1) {
+
+         if  (z->d_a * z->d_b != 2)
+             fprintf (stderr, "\ndata_gauss_motor: wrong area size\n");
+
+         for (ct_t = begin; ct_t < end; ++ct_t) {
+
+             if  (choose == 0) {
+                 cmd->S_target[ct_t][0] = height;
+                 cmd->S_target[ct_t][1] = 0;
+             }
+             if  (choose == 1) {
+                 cmd->S_target[ct_t][0] = 0;
+                 cmd->S_target[ct_t][1] = height;
+             }
+         }
+     }
+}
+
+
+/******************************** data_zhang *********************************/
+/* From data_gauss. But makes zhang-like tuning curves, offset to be added.  */
+
+void data_zhang (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t, ct_h, i;
+    static long int idum[1] = {-1};
+
+    double pos_a  = cmd->quantum[0][0]; /**hill position; random if -1      **/
+    double pos_b  = cmd->quantum[0][1]; /**      "              "           **/
+    double K      = cmd->quantum[1][0]; /**functional role of "1/sigma"     **/
+    double B      = cmd->quantum[2][0]; /**largest point; propto "vol"      **/
+    double A      = cmd->quantum[3][0]; /**zero_line, or offset             **/
+    int per_bound = (int)(cmd->quantum[4][0]); /**periodic boundary    new!!**/
+    int num_hills = (int)(cmd->quantum[5][0]); /**stat. mean number; 1 if -1**/
+
+    if  (z->d_a == 1)  pos_a = 0.0;
+    if  (z->d_b == 1)  pos_b = 0.0;
+
+
+    if  (num_hills != -1)
+        num_hills = (int)poidev (num_hills, idum);
+    else
+        num_hills = 1;
+
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (i = 0; i < z->d_a * z->d_b; ++i)
+            cmd->S_target[ct_t][i] = A;
+
+    for (ct_h = 0; ct_h < num_hills; ++ct_h) {
+
+        if  (cmd->quantum[0][0] == -1)
+            pos_a = drand48() * (double)z->d_a;
+
+        if  (cmd->quantum[0][1] == -1)
+            pos_b = drand48() * (double)z->d_b;
+
+        for (ct_t = begin; ct_t < end; ++ct_t)
+            mk_zhang (cmd->S_target[ct_t], z->d_a, z->d_b, pos_a, pos_b, B, K, per_bound);
+    }
+}
+
+
+
+/******************************** data_block *********************************/
+/* Makes a rectangle of ON units.                                            */
+
+void data_block (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t, A, B;
+
+    int pos_a    = (int)(cmd->quantum[0][0]);
+    int pos_b    = (int)(cmd->quantum[0][1]);
+    int span_a   = (int)(cmd->quantum[1][0]);  /**functional role of "sigma"**/
+    int span_b   = (int)(cmd->quantum[1][1]);
+    double prob1 = cmd->quantum[2][0];/**first half, prob for point to be ON**/
+    double prob2 = cmd->quantum[2][1];/**    new!!         "  on second half**/
+    double lum   = cmd->quantum[3][0];        /**largest point; propto "vol"**/
+    int quantized = (int)(cmd->quantum[4][0]);   /**no overlapping positions**/
+    double prob;
+
+    if  (z->d_a == 1) { pos_a = 0; span_a = 1; }
+    if  (z->d_b == 1) { pos_b = 0; span_b = 1; }
+
+    /**
+    MARK:
+    **/
+
+    if  (pos_a == -1)
+        pos_a = (int)(drand48() * (double)z->d_a);
+    if  (pos_b == -1)
+        pos_b = (int)(drand48() * (double)z->d_b);
+
+    if  (quantized) {
+        pos_a = (pos_a * span_a) % z->d_a;
+        pos_b = (pos_b * span_b) % z->d_b;
+    }
+
+    /**
+    if  (z->d_a == 1)
+    if  (pos_b < z->d_b / 2)
+    if  (drand48() < 0.85) {
+        pos_b = -1;
+        goto MARK;
+    }
+    **/
+
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (A = 0; A < z->d_a; ++A)
+            for (B = 0; B < z->d_b; ++B)
+                if  (  (A >= pos_a) && (A < pos_a + span_a)
+                    && (B >= pos_b) && (B < pos_b + span_b)) {
+                    if  (  (z->d_b == 1 && A < z->d_a / 2)
+                        || (z->d_a == 1 && B < z->d_b / 2))
+                        prob = prob1;
+                    else
+                        prob = prob2;
+                    cmd->S_target[ct_t][A*z->d_b + B] = drand48() < prob ? lum : 0.0;
+                } else {
+                    cmd->S_target[ct_t][A*z->d_b + B] = 0.0;
+                }
+}
+
+
+
+/******************************** data_trichter ******************************/
+/* For a space-dependent weight-constraint. Distance only from 0-point.      */
+
+void data_trichter (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t, A, B;
+    double diffA, diffB;
+    int d_a = z->d_a;
+    int d_b = z->d_b;
+    int OK  = cmd->anz_quantums == 2 ? 1
+            : fprintf (stderr, "\ndata_trichter wants two arguments given!\n");
+    double offset = cmd->quantum[0][0];
+    double gain   = cmd->quantum[1][0];
+
+    if  (OK)
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (A = 0; A < d_a; A++)
+             for (B = 0; B < d_b; B++) {
+                 diffA = (A <= d_a / 2) ? (double)(A) : (double)(-d_a + A);
+                 diffB = (B <= d_b / 2) ? (double)(B) : (double)(-d_b + B);
+
+                 cmd->S_target[ct_t][A * d_b + B] = (offset + gain * (diffA * diffA + diffB * diffB)) / (double)(d_a * d_b);
+             }
+}
+
+
+
+/******************************** mk_gauss1d *********************************
+ * Set 1) vector  of size 2) d_a  to 1-dim Gauss with periodic boundary      *
+ * at 3) pos_a  with 4) sigma  and 5) vol.                                   *
+ * Not in .h file. For use only here.                                        *
+void mk_gauss1d (double *vector, int d_a, double pos, double sigma, double vol) {
+    int A;
+    double diffA;
+    double normfact = vol / (sqrt (2.0 * M_PI) * sigma);
+    static int firsttime = 1;
+    static int d_a_save;
+    static double *G;
+    static double *dist;
+    if  (firsttime) {
+        G         = d_vector (d_a);
+        dist      = d_vector (d_a);
+        d_a_save  = d_a;
+        firsttime = 0;
+    }
+    if  (d_a != d_a_save) {
+        fprintf (stderr, "\nerror in mk_gauss1d. used with differing sizes");
+        fprintf (stderr, "\nreallocate vecor if d_a > d_a_save\n");
+    }
+    for (A = 0; A < d_a; A++) {
+        **for periodic boundary**
+        diffA = (A <= d_a / 2) ? A : - d_a + A;
+        **move centers away from pixel centers**
+        diffA += pos - (int)pos;
+        dist[A] = (double)(diffA * diffA);
+    }
+    for (A = 0; A < d_a; A++)
+        G[A] = normfact * exp (-dist[A] / (2.0 * sigma * sigma));
+    for (A = 0; A < d_a; A++)    **for shift**
+        vector[A] = G[(A + (int)pos) % d_a];
+}
+
+ ****************************** data_gauss1d *********************************
+ * Sets 1-dim Gaussian to random positions. Used for sophie1d.               *
+void data_gauss1d (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t;
+    double pos    = drand48() * (double)z->d_b;
+    double vol    = 1.0;
+    double sigma  = 2.0;
+    if  (z->d_a != 1)  fprintf (stderr, "\ndata_gauss1d wants d_b=1\n");
+    if  (z->d_b == 1)  fprintf (stderr, "\nd_b should prob be > 1 ey?\n");
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        mk_gauss1d (cmd->S_target[ct_t], z->d_b, pos, sigma, vol);
+}
+******************************************************************************/
+
+
+/******************************** mk_gauss123 ********************************/
+/* Set 1-dim Gaussians to one of 3 different areas, dependent of each other. */
+/* q[0][0] = 1/-1 -> get new values.                                         */
+
+void data_gauss123 (AGENT *z, COMMAND *cmd, DATA *d, int begin, int end) {
+    int ct_t;
+
+    static double pos1, pos2, pos3, vol1, vol2, vol3, sigma1, sigma2, sigma3;
+    static int d_a_save = -1;
+
+    if  (z->d_b != 1)  fprintf (stderr, "\ndata_gauss123 wants d_a=1\n");
+    if  (z->d_a == 1)  fprintf (stderr, "\nd_a should prob be > 1 ey?\n");
+
+    if  ((d_a_save != -1) && (d_a_save != z->d_a))
+        fprintf (stderr, "\nall input areas must have the same size!\n");
+    d_a_save = z->d_a;
+
+
+    if  ((cmd->quantum[0][0] == -1) || (cmd->quantum[0][0] == 1)) {
+        pos1 = drand48() * (double)z->d_a;
+        pos2 = drand48() * (double)z->d_a;
+        pos3 = pos1 + pos2;
+        if  (pos3 > (double)(z->d_a))
+            pos3 -= (double)(z->d_a);
+
+        sigma1 = sigma2 = sigma3 = 2.0;
+        vol1 = vol2 = vol3 = 1.0;
+    }
+
+    if  (cmd->quantum[1][0] == 1)
+        for (ct_t = begin; ct_t < end; ++ct_t)
+            /*mk_gauss1d (cmd->S_target[ct_t], z->d_a, pos1, sigma1, vol1);*/
+            mk_zeppelin (cmd->S_target[ct_t], z->d_a, z->d_b, pos1, 0, vol1,
+                                              sigma1, sigma1, 0.0);
+
+    if  (cmd->quantum[1][0] == 2)
+        for (ct_t = begin; ct_t < end; ++ct_t)
+            /*mk_gauss1d (cmd->S_target[ct_t], z->d_a, pos2, sigma2, vol2);*/
+            mk_zeppelin (cmd->S_target[ct_t], z->d_a, z->d_b, pos2, 0, vol2,
+                                              sigma2, sigma2, 0.0);
+
+    if  (cmd->quantum[1][0] == 3)
+        for (ct_t = begin; ct_t < end; ++ct_t)
+            /*mk_gauss1d (cmd->S_target[ct_t], z->d_a, pos3, sigma3, vol3);*/
+            mk_zeppelin (cmd->S_target[ct_t], z->d_a, z->d_b, pos3, 0, vol3,
+                                              sigma3, sigma3, 0.0);
+}
+
+
+
+
+
+
+
+
+/**problem: too many different stimuli. solutions:
+   - restrict one/some of: pos_a / pos_b / angle
+   - heavy overcomplete coding
+   task: groups on a higher hierarchical level. solutions:
+   - for one group, angle is within an interval of size M_PI/n <=> n groups
+     -> min number of hidden neurons: d_a * d_b * n * res, res ~ 5 or so.
+   - angle is exactly similar for different zeppelins
+**/
+
+/******************************************************************************
+
+such things into file named "data.fixed.c":
+
+void import_snns_data (DATA *d) {
+}
+
+void init_snns_input {
+}
+
+void init_snns_output {
+ needs to communicate with input: which datapoint to take?
+ possible: only seperate count of a static variable -> only for order
+ else: transmit a pointer to some space for free use (number of the datapoint)
+ datapoints random / order
+}
+
+
+_______________________________________________________________________________
+SNNS pattern definition file V3.2
+generated at Mon Apr 25 18:08:50 1994
+
+
+No. of patterns : 1200
+No. of input units : 6
+No. of output units : 5
+
+#
+-0.465798  -0.596091  -0.609121  -0.824104  -0.934853  -0.934853  
+-0.8  0.8  -0.8  -0.8  -0.8  
+-0.413681  -0.602606  -0.589576  -0.811075  -0.921824  -0.960912  
+-0.8  0.8  -0.8  -0.8  -0.8  
+...____________________________________________________________________________
+_______________________________________________________________________________
+patterns: 1200
+areas   : 3
+units 0 : 2 x 3
+units 1 : 1 x 5
+units 2 : 1 x 2
+
+#
+-0.465798  -0.596091  -0.609121  -0.824104  -0.934853  -0.934853  
+-0.8  0.8  -0.8  -0.8  -0.8  
+0.1 0.2
+-0.413681  -0.602606  -0.589576  -0.811075  -0.921824  -0.960912  
+-0.8  0.8  -0.8  -0.8  -0.8  
+0.1 0.2
+...____________________________________________________________________________
+
+
+void init_stereo () {
+ within one or two areas ? (complicated only in the latter case)
+}
+
+void init_random () {
+}
+
+void init_gabor () {
+}
+
+void init_offset () {
+}
+
+void init_onepixel () {
+}
+******************************************************************************/

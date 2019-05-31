@@ -1,0 +1,1451 @@
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+Vector.cc:515 warning : pointing singularity (gimbal lock)
+Vector.cc:515 warning : pointing singularity (gimbal lock)
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo
+main.cc:249 *** Gazebo  ***
+main.cc:262 using display [:0.0]
+ModelFactory.cc:58 registered AvatarHeli (static)
+ModelFactory.cc:58 registered Blimp (static)
+ModelFactory.cc:58 registered ClodBuster (static)
+ModelFactory.cc:58 registered CarChassis (static)
+ModelFactory.cc:58 registered Factory (static)
+ModelFactory.cc:58 registered GarminGPS (static)
+ModelFactory.cc:58 registered GroundPlane (static)
+ModelFactory.cc:58 registered LightSource (static)
+ModelFactory.cc:58 registered MonoCam (static)
+ModelFactory.cc:58 registered ObserverCam (static)
+ModelFactory.cc:58 registered Pioneer2AT (static)
+ModelFactory.cc:58 registered Pioneer2DX (static)
+ModelFactory.cc:58 registered Pioneer2Gripper (static)
+ModelFactory.cc:58 registered SegwayRMP (static)
+ModelFactory.cc:58 registered Shrimp (static)
+ModelFactory.cc:58 registered SickLMS200 (static)
+ModelFactory.cc:58 registered SimpleSolid (static)
+ModelFactory.cc:58 registered SonyVID30 (static)
+ModelFactory.cc:58 registered StereoHead (static)
+ModelFactory.cc:58 registered TruthWidget (static)
+ModelFactory.cc:58 registered Road (static)
+ModelFactory.cc:58 registered Terrain (static)
+World.cc:275 Model:ObserverCam
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:LightSource
+World.cc:275 Model:LightSource
+World.cc:275 Model:GroundPlane
+GroundPlane.cc:165 loading texture file [/home/cs0cwe/gazebo_stuff/dino/CanonVCC4/floor.ppm]
+World.cc:275 Model:PeopleBot
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/PeopleBot/PeopleBot.so...
+ModelFactory.cc:58 registered PeopleBot (plugin)
+World.cc:275 Model:CanonVCC4
+World.cc:402 loading /home/cs0cwe/gazebo_stuff/dino/CanonVCC4/CanonVCC4.so...
+ModelFactory.cc:58 registered CanonVCC4 (plugin)
+GLContext.cc:561 trying GLXP pbuffer rendering
+GLContext.cc:616 rendering: [GLXP pbuffer] direct [no] RGBA [8 8 8 0] depth [24]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/tabletexture.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+SimpleSolid.cc:268 loading texture file [../gazebo_stuff/orangeskin1.ppm]
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+World.cc:275 Model:SimpleSolid
+WorldFile.cc:357 warning : in ../gazebo_stuff/example1.world:192 unused attribute [textureSize]
+main.cc:306 server id [0]
+main.cc:385 errors, warnings and messages have been appended to .gazebo

@@ -1,0 +1,29 @@
+
+                      INTRODUCING A NEW FUNCTION
+                      ==========================
+
+1. FILE local.c
+===============
+
+/******************************* local_sum ***********************************/
+/* function does not use parameters                                          */
+
+double local_sum (double *par, double val1, double val2) {
+
+    return (val1 + val2);
+}
+
+
+2. FILE local.h
+===============
+
+double local_sum          (double *par, double val1, double val2);
+
+
+3. FILE vehicle.c
+=================
+
+    if  (!strcmp (cmd->func_name, "local_sum"))
+        cmd->localfunc = local_sum;
+
+

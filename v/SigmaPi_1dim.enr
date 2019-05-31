@@ -1,0 +1,220 @@
+Content-Type: text/enriched
+Text-Width: 70
+
+global {
+
+ iter         0
+
+ areas        3
+
+ mult         1
+
+
+ <x-color><param>blue</param>d "/tmp/coco"</x-color>
+}
+
+
+all {
+
+ <x-color><param>DimGrey</param>/**default area size**/</x-color>
+
+ d_a          15
+
+ d_b          1
+
+}
+
+
+area 0 {
+
+ d_a          15
+
+ d_b          1
+
+}
+
+
+area 1 {
+
+ d_a          15
+
+ d_b          1
+
+}
+
+
+
+<x-color><param>DimGrey</param>/**This creates Fig.6a) of:
+
+   "</x-color><x-color><param>DimGrey</param>A Self-Organizing Map of Sigma-Pi Units",
+
+   C. Weber and S. Wermter, S., Neurocomputing, 2006/7 (in press).
+
+
+   R_0 and R_1 are the network inputs; e.g. R_0 is visually perceived object position, R_1 is the viewing direction of the eyes.
+
+      Each are at two different times, time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>, </x-color><x-color><param>red</param>1</x-color><x-color><param>DimGrey</param>. These are differernt "viewing angles" belonging to one body-centered position.
+
+   S_2 is the map activation (after winner finding); only needed for one of the data instances ("viewing angle"), e.g. time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>.
+
+   w_2_0 are the sigma-pi weights: for each neuron (square), vertical is area 0 input, horizontal is area 1 input.
+
+</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+
+<x-color><param>red</param>set rlen         2  </x-color>         <x-color><param>DimGrey</param>/**2**/</x-color><x-color><param>red</param>
+
+</x-color><x-color><param>deep pink</param>set timescale    1</x-color>           <x-color><param>DimGrey</param>/**inverse of (rlen-1) (if total_fit_gauss used 1ce**/</x-color><x-color><param>red</param>
+
+</x-color>set import      <x-bg-color><param>cyan</param> 0</x-bg-color>           <x-color><param>DimGrey</param>/**0 if initial learning**/</x-color>
+
+
+set <bold>trainiter</bold>   <x-bg-color><param>cyan</param> 300000</x-bg-color>      <x-color><param>DimGrey</param>/**50000**/</x-color>
+
+set export      <x-bg-color><param>cyan</param> 1</x-bg-color>           <x-color><param>DimGrey</param>/**occurs only in train; weights and thresholds**/</x-color>
+
+<italic>set itercut      325000</italic>
+
+
+<italic>set sigmas 8.0+3.5+0.00001</italic>   <x-color><param>DimGrey</param>/**neighbourhood interaction widths**/</x-color>
+
+<italic>set stones 33000+200000</italic>      <x-color><param>DimGrey</param>/**the times at which the 2nd and 3rd neighbourhood interaction width values are reached**/</x-color>
+
+
+
+series (1) {
+
+ if  ($import = 0)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>2(n) {N,w; weight_sigpi_alloc_full    ;0,1; , ; -0.1+0.1}    /*only extra-area multiplicative interactions*/</x-color>
+
+ }
+
+ if  ($import)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>2(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_sigpi_alloc_import; 0,1; , ;    }</x-color>
+
+ }
+
+}
+
+
+
+<x-color><param>DimGrey</param>/**instead of winner-finding based on max response, use this to find winner based on min distance to data**</x-color>
+
+  <x-color><param>deep sky blue</param>2(o) {P,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>deep sky blue</param>; weight_sigpi_euclid; 0, 1 ; R, R  ; }</x-color>
+  2(t) {S  ; total_neigh_winner;       ; Q     ; <x-color><param>deep sky blue</param>-</x-color>1, $<italic>sigmas</italic>, $<italic>stones</italic>, <x-color><param>deep pink</param>0.2</x-color>}
+
+<x-color><param>DimGrey</param>**/</x-color>
+
+
+
+
+/**TRAIN**/
+
+
+series ($<bold>trainiter</bold>) {
+
+
+ <x-color><param>DimGrey</param>/**presentation of the data; supplies two instances of data, one at time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param> and one at time </x-color><x-color><param>red</param>1</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; alltime) {
+
+  0(n) {T  ; data_gauss_3areas_2D;     ;       ; 1,  0,   0.5,  1.0,   <x-bg-color><param>tomato</param>  2</x-bg-color>, 0.5}
+  1(n) {T  ; data_gauss_3areas_2D;     ;       ; 0,  1,   0.5,  1.0}
+  2(n) {T  ; data_gauss_3areas_2D;     ;       ; 0,  2,   0.5,  1.0}
+ }                                             <x-color><param>DimGrey</param>/*new area sigma height mode stretch*/</x-color>
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; order) {
+
+  0(t) {R  ; total_normalize   ;       ; T     ; 1.0}
+  1(t) {R  ; total_normalize   ;       ; T     ; 1.0}
+
+ }
+
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; order) {
+
+  2(o) {P,<x-color><param>DarkGreen</param>w</x-color>; weight_sigpi_feed ; 0, 1  ; R, R  ;    }              <x-color><param>DimGrey</param>/**map activation needed only at time (data instance) </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+  2(t) {R  ; total_winner      ;       ; P     ; 1  }   <x-color><param>DimGrey</param>/**for observe**/</x-color>
+
+ }
+
+<x-color><param>DimGrey</param> sw (</x-color><x-color><param>red</param>1</x-color><x-color><param>DimGrey</param>; </x-color><x-color><param>red</param>2</x-color><x-color><param>DimGrey</param>; order) {                                     </x-color><x-color><param>DimGrey</param>/**only for observe:    test how other data instance activates map**/</x-color><x-color><param>DimGrey</param>
+
+  2(o) {O,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>DimGrey</param>; weight_sigpi_feed ; 0, 1  ; R, R  ;    }   </x-color><x-color><param>DimGrey</param>/**only for observe:   if Q_2=R_2, then same winner for both views**/</x-color><x-color><param>DimGrey</param>
+
+  2(t) {Q  ; total_winner      ;       ; O     ; 1  }   </x-color><x-color><param>DimGrey</param>/**only for observe:                            (i.e. well learnt)**/</x-color><x-color><param>DimGrey</param>
+
+ }</x-color>
+
+ sw (<x-color><param>red</param>1</x-color>; <x-color><param>red</param>$rlen</x-color>; order) {
+
+  2(o) {P  ; single_copy       ;       ;       ; <x-color><param>red</param>-1 </x-color>}   <x-color><param>DimGrey</param>/**map activation for postsynaptic learning value S is from time </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+  2(t) {S  ; total_fit_gauss   ;       ; <bold>P</bold>     ; $<italic>sigmas</italic>, $<italic>sigmas</italic>, $<italic>stones</italic>, <x-color><param>deep pink</param>$timescale</x-color>, 1, 15.1}       <x-color><param>DimGrey</param>/**find soft winner**/</x-color>
+  2(t) {S  ; total_normalize   ;       ;       ; 1.0}
+
+  <x-color><param>DarkGreen</param>2(o) {N,w; weight_sigpi_kohonen; 2, 0, 1; </x-color><bold>S</bold><x-color><param>DarkGreen</param>, R, R; 0.01}                  </x-color> <x-color><param>DimGrey</param>/**the presynaptic values (</x-color><x-color><param>DarkGreen</param>R</x-color><x-color><param>DimGrey</param>) are from time </x-color><x-color><param>red</param>1</x-color><x-color><param>DimGrey</param>**/</x-color>
+ }
+
+
+ if  (iter > $<italic>itercut</italic>)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; order) {
+
+  if  (iter % 1000)
+
+  <x-color><param>DarkGreen</param>2(o) {N,w ; weight_sigpi_cutsmall; 0,1; ,      ; 0, 1+0.1}</x-color>
+
+ }
+
+
+
+ <x-color><param>DimGrey</param>/**write to files**/</x-color>
+
+ if  (iter % 1000)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>$rlen</x-color>; alltime) {
+
+  0(n) {T,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**data**/</x-color>
+
+  0(n) {R,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**data**/</x-color>
+
+  1(n) {T,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**data**/</x-color>
+
+  1(n) {R,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**data**/</x-color>
+
+  2(n) {T,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**data, not used (could be used for supervised learning)**/</x-color>
+
+  2(n) {S,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**"majority vote" (Gaussian) used for learning**/</x-color>
+
+  2(n) {P,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**map input before taking soft-winner**/</x-color>
+
+  2(n) {Q,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**the map activation (hard winner) from view at time </x-color><x-color><param>red</param>1</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+  2(n) {R,<x-color><param>blue</param>d</x-color>; observe_phase; ; ;  }                       <x-color><param>DimGrey</param>/**          "             "             "            </x-color><x-color><param>red</param>0</x-color><x-color><param>DimGrey</param>**/</x-color>
+
+ }
+
+
+ if  (iter % 1000)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  2(n) {N,<x-color><param>DarkGreen</param>w  </x-color>; weight_sigpi_histogram; 0, 1; , ; 10}
+
+  if  ($export)
+
+  2(n) {N,<x-color><param>DarkGreen</param>w</x-color>+<x-color><param>blue</param>d</x-color>; weight_sigpi_export; 0, 1; ,  ; 6   }
+
+ }
+
+
+}
+

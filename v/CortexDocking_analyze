@@ -1,0 +1,622 @@
+/**
+This contains some additional code to analyze the network. Produces Fig.8 of
+"A hybrid generative and predictive model of the motor cortex"
+ Cornelius Weber, Stefan Wermter and Mark Elshaw
+ Neural Networks, 19 (4), 339-353 (2006)
+
+Learning and weight-export is out-commented here.
+Weights have to be trained earlier by the file CortexDocking(.enr).
+
+To display the flow field of the reinforcement-trained network:
+- set iterWreinforce   1000000       (or any large number)
+- After running cococo with this file, then run the flowfield.tcl file:
+  wish -f flowfield.tcl
+  "wish" is the widget shell, the TCL/TK interpreter.
+  This produces also the eps file  flow.eps  for visualization.
+
+To display the flowfield of the Helmholtz machine network (the bu and td weights):
+- set iterWreinforce   0             (so not to go in there)
+- set iterWbu          200000        (or any large number)
+- Then run the flowfield.tcl file:
+  wish -f flowfield.tcl
+
+To display the flowfield of the predictive model (lateral weights V):
+- set iterWreinforce   0             (so not to go in there)
+- set iterWbu          0             (so not to go in there)
+- set iterV            100000        (or any large number)
+- Then run the flowfield.tcl file:
+  wish -f flowfield.tcl
+
+To display the flowfields with a different robot angle,
+change the last argument of the function total_scan_coord (which is here set to 0.0).
+**/
+
+global {
+ iter         0
+ areas        10
+ mult         1
+
+ d           "/tmp/coco"
+}
+
+
+all {
+ d_a          0
+ d_b          0
+}
+
+
+/**area 4: place cells**/
+area 4 {
+set numang    7          /**num_angle (don't put a space before the "set"!)**/
+ d_a          112        /**16 * num_angle**/
+ d_b          24
+}
+
+/**area 5: critic -- holds value function**/
+area 5 {
+ d_a          1
+ d_b          1
+}
+
+/**area 7: real world coordinates -- x,y,phi**/
+area 7 {
+ d_a          3
+ d_b          1
+}
+
+/**area 6: actor -- steers the agent into N E S W**/
+area 6 {
+ d_a          1
+ d_b          4
+}
+
+/**area 3: the perceived Gaussian in NON-blown-up coordinates**/
+area 3 {
+ d_a          16
+ d_b          24
+}
+
+/**area 8: phi as Gaussian -- HD cells -- angle input for the cortex**/
+area 8 {
+ d_a          7
+ d_b          1
+}
+
+/**area 9: motor cortex -- its input is (i) the perceived location from area 3, (ii) the angle from area 9 and (iii) the motor output from area 6**/
+area 9 {
+ d_a          16
+ d_b          16
+}
+
+
+
+/**Actor-Critic**/
+set iterWreinforce   1000000       /**1000000**/
+set importWreinforce 1
+
+/**Helmholtz Machine**/
+set iterWbu          200000        /**200000**/
+set importWbu        1
+set epsWbu           0.01
+set dectimesepsWbu   0.00015
+
+/**Lateral Predictive Weights**/
+set iterV            100000       /**100000**/
+set importV          1
+set epsV             0.01
+set dectimesepsV     0.00001
+
+
+series (1) {
+ if ($importWreinforce = 0)
+ sw (0; 1; alltime) {
+  5(n) {N,w; weight_list_alloc_full; 4    ;   ; -0.01+0.01} /**critic weights**/
+  6(n) {N,w; weight_list_alloc_full; 4    ;   ; -0.01+0.01} /**actor weights**/
+ }
+ if ($importWreinforce = 1)
+ sw (0; 1; alltime) {
+  5(n) {N,w+d; weight_list_alloc_import; 4;   ;    }
+  6(n) {N,w+d; weight_list_alloc_import; 4;   ;    }
+ }
+
+ sw (0; 1; order) {
+  5(o){R; local_const       ; ,   ; ,   ; 1.0 } /**so that total_init_coord chooses a new position**/
+
+  9(o){O; local_const       ; ,   ; ,   ; 0.0 }              /**    init   **/
+  3(o){O; local_const       ; ,   ; ,   ; 0.0 }              /**    the    **/
+  6(o){O; local_const       ; ,   ; ,   ; 0.0 }              /**    old    **/
+  8(o){O; local_const       ; ,   ; ,   ; 0.0 }              /**activations**/
+ }
+}
+
+
+set sigma  1.5
+set sigang 0.5
+set maxang 0.78539816  /**PI/4**/
+set gamma  0.9
+
+
+/**training of the reinforcement module to perform the docking**/
+series ($iterWreinforce) {
+
+ sw (0; 1; order) {
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } /****/
+  7(t){P  ; total_init_coord; 5   ; R   ;16+24, 50, 0.0} /**init random new (x,y,phi), if R != 0, else leave as is <- make sure orange visible; set phi = 0 for simplicity!**/
+
+  7(t){P  ; total_scan_coord;     ;     ; 1, 16+24, 16+24, 0.0}       /**angles tested: 0.0, 0.4363323, -0.4363323**/
+
+  4(t){P  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){K,w; weight_list_feed; 4   ; P   ;      } /**Eq.2:  critic activation at time t**/
+        
+  6(o){N,w; weight_list_feed; 4   ; P   ;      } /**Eq. before 9: actor inner activation**/
+  6(t){M  ; total_rand_winner;    ; N   ;      } /**Eq.9:  choose action stochastically**/
+
+  6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}
+  6(t){M  ; total_scan_coord;     ;     ; 2    }
+
+  6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}
+
+  7(t){Q  ; total_move_coord; 6+7 ; M+P ; 0.9+0.1} /**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/
+  4(t){Q  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){R  ; feed_dock_reward; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,8.0} /**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; 0.0 for nicer presentation**/
+
+  5(o){L,w; weight_list_feed; 4   ; Q   ;      } /**Eq.2:  critic activation at time t+1             **/
+  5(o){L  ; local_mult_const; ,   ; ,   ;$gamma} /**Eq.7:  discount factor gamma                     \    compute **/
+  5(o){T  ; local_sub       ; ,   ; L, K;      } /**Eq.7:  difference critic act at t+1 minus at t    |   delta   **/
+  5(o){T  ; local_sum       ; ,   ; R,  ;      } /**Eq.7:  add reward                                /            **/
+  6(t){T  ; total_spread_xy ; 5   ;     ; 2    } /**                      delta on all action units  **/
+  6(o){O  ; local_mult      ; ,   ; T, M;      } /**Eq.10: delta * g_j    delta on active action unit**/
+
+/*5(o){N,w; weight_list_hebb; 5, 4; T, P; 0.1  }*/ /**Eq.8:  delta * f_i(p_t)                          **/
+/*6(o){N,w; weight_list_hebb; 6, 4; O, P; 0.1  }*/ /**Eq.10: (delta*g_j) * f_i(p_t)                    **/
+
+  4(t){R; total_pause     ;     ;     ;  0  } /**in ms**/
+ }
+
+ if (iter % 100)
+ sw (0; 1; alltime) {
+  4(o){P,d; observe_act     ;     ;     ;      }
+  4(o){Q,d; observe_act     ;     ;     ;      }
+  5(o){R,d; observe_act     ;     ;     ;      }
+  5(o){L,d; observe_act     ;     ;     ;      }
+  6(o){N,d; observe_act     ;     ;     ;      }
+  6(o){M,d; observe_act     ;     ;     ;      }
+  7(o){P,d; observe_act     ;     ;     ;      }
+  7(o){Q,d; observe_act     ;     ;     ;      }
+/*6(n){N,w+d; weight_list_export; 4;    ;      }*/
+/*5(n){N,w+d; weight_list_export; 4;    ;      }*/
+ }
+}
+
+
+
+
+
+series (1) {
+ if ($importWbu = 0)
+ sw (0; 1; alltime) {
+  3(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  6(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  8(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  9(n) {N,w; weight_list_alloc_full; 3    ;   ; -0.01+0.01}   /****/
+  9(n) {N,w; weight_list_alloc_full; 6    ;   ; -0.01+0.01}   /****/
+  9(n) {N,w; weight_list_alloc_full; 8    ;   ; -0.01+0.01}   /****/
+ }
+ if ($importWbu = 1)
+ sw (0; 1; alltime) {
+  3(n) {N,w+d; weight_list_alloc_import; 9;   ;    }
+  6(n) {N,w+d; weight_list_alloc_import; 9;   ;    }
+  8(n) {N,w+d; weight_list_alloc_import; 9;   ;    }
+  9(n) {N,w+d; weight_list_alloc_import; 3;   ;    }
+  9(n) {N,w+d; weight_list_alloc_import; 6;   ;    }
+  9(n) {N,w+d; weight_list_alloc_import; 8;   ;    }
+ }
+}
+
+/**training of the motor cortex (only HM, i.e. BU/TD, not lateral yet)**/
+
+set scale3 1.0    /**was 1.0**/
+set scale6 1.0    /**was 2.0**/
+set scale8 2.0    /**was 1.5**/
+
+series ($iterWbu) {
+
+ sw (0; 1; order) {
+  3(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}  /** all weights W **/
+  6(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}  /**     are       **/
+  8(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}  /**   positive    **/
+  9(o){N,w; weight_list_rectify;3+6+8; ++   ; 0.0, 1}  /**     only      **/
+ }
+
+ sw (0; 1; order) {
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } /****/
+  7(t){P  ; total_init_coord; 5   ; R   ;16+24, 50, 0.0} /**init random new (x,y,phi), if R != 0, else leave as is <- make sure orange visible; set phi = 0 for simplicity!**/
+
+  /*7(t){P  ; total_scan_coord;     ;     ; 1, 16+24, 16+24, 0.0}*/       /**angles tested: 0.0, 0.4363323, -0.4363323**/
+
+  4(t){P  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){K,w; weight_list_feed; 4   ; P   ;      } /**Eq.2:  critic activation at time t**/
+        
+  6(o){N,w; weight_list_feed; 4   ; P   ;      } /**Eq. before 9: actor inner activation**/
+  6(t){M  ; total_rand_winner;    ; N   ;      } /**Eq.9:  choose action stochastically**/
+
+  /*6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}*/
+  /*6(t){M  ; total_scan_coord;     ;     ; 2    } */
+
+  6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}
+
+  7(t){Q  ; total_move_coord; 6+7 ; M+P ; 0.9+0.1} /**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/
+  4(t){Q  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){R  ; feed_dock_reward; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,8.0} /**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; 0.0 for nicer presentation**/
+ }
+
+ /**WAKE: TD weights W_(368)9 learn**/
+ sw (0; 1; order) {
+  3(t){T; total_imag_coord  ; 7   ; P   ;1, $sigma}                     /**compute the perceived orange (on the original "where" area, NOT on the angle-blown-up input)**/
+  3(o){T; local_mult_const  ; ,   ; ,   ; $scale3 }                     /**!!!**/
+  6(o){T; local_copy        ; ,   ; M,  ;         }                     /**the action**/
+  6(o){T; local_mult_const  ; ,   ; ,   ; $scale6 }                     /**!!!**/
+  8(t){T; total_imag_coord  ; 7   ; P   ;2, $sigang, $numang+$maxang}   /**the heading direction cells**/
+  8(o){T; local_mult_const  ; ,   ; ,   ; $scale8 }                     /**!!!**/
+ }
+
+ sw (0; 1; order) {
+  9(o){T,w; weight_list_feed;3+6+8;T+T+T;     }
+
+  9(o){Q,w; weight_list_feed; 3   ; T   ;     }                         /** only  **/
+  9(o){R,w; weight_list_feed; 6   ; T   ;     }                         /**  for  **/
+  9(o){S,w; weight_list_feed; 8   ; T   ;     }                         /**observe**/
+
+  9(o){T; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+
+  3(o){S,w; weight_list_feed; 9   ; T   ;     }
+  3(o){R; local_sub         ; ,   ; T, S;     }
+/*3(o){N,w; weight_list_hebb; 3, 9; R, T; $epsWbu}*/
+  6(o){S,w; weight_list_feed; 9   ; T   ;     }
+  6(o){R; local_sub         ; ,   ; T, S;     }      /**to plot the TD errors R (continuous) with init on area 6**/
+/*6(o){N,w; weight_list_hebb; 6, 9; R, T; $epsWbu}*/
+  8(o){S,w; weight_list_feed; 9   ; T   ;     }
+  8(o){R; local_sub         ; ,   ; T, S;     }
+/*8(o){N,w; weight_list_hebb; 8, 9; R, T; $epsWbu}*/
+
+/*3(o){N,w; weight_list_decay ; 9   ;     ; $dectimesepsWbu }*/
+/*6(o){N,w; weight_list_decay ; 9   ;     ; $dectimesepsWbu }*/
+/*8(o){N,w; weight_list_decay ; 9   ;     ; $dectimesepsWbu }*/
+ }
+
+
+ /**to plot the TD errors S (continuous) if NO init on area 6, but during testing -- comment this out to plot the training errors, i.e. with correct area 6 init**/
+ sw (0; 1; order) {
+  9(o){L,w; weight_list_feed    ;3+8;T+T;     }
+  9(o){L; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+  6(o){S,w; weight_list_feed    ; 9   ; L   ;     }
+  6(o){S; local_sub         ; ,   ; T, S;     }
+ }
+
+
+/**SLEEP: BU weights W_9(368) learn**/
+ sw (0; 1; order) {
+  9(t){N; total_topo_gibbs_01;,   ; ,   ; 10+0.75, 1.0+1.0, 1}    /**init sleep phantasy**/
+  3(o){N,w; weight_list_feed; 9   ;     ;     }
+  6(o){N,w; weight_list_feed; 9   ;     ;     }
+  8(o){N,w; weight_list_feed; 9   ;     ;     }
+  9(o){M,w; weight_list_feed;3+6+8;N+N+N;     }
+  9(o){M; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+  9(o){N; local_sub         ; ,   ; N, M;     }
+/*9(o){N,w; weight_list_hebb;9,3+6+8;N,N+N+N; $epsWbu}*/
+/*9(o){N,w; weight_list_decay ;3+6+8; ,   ; $dectimesepsWbu}*/
+ }
+
+
+
+
+ /**test whether the feed-back weights W_69 can already reconstruct the optimal motor output**/
+ sw (0; 1; order) {
+
+  7(t){P; total_scan_coord  ;     ;     ; 1, 16+24, 16+24, 0.43633231}/**/ /**init x,y on grid, given phi; write to file**/ /**comment this line OUT to obtain the errors!**/
+
+  3(t){P; total_imag_coord  ; 7   ;     ; 1, $sigma}                    /**compute the perceived orange**/
+  3(o){P; local_mult_const  ; ,   ; ,   ; $scale3  }                     /**!!!**/
+  8(t){P; total_imag_coord  ; 7   ; P   ; 2, $sigang, $numang+$maxang}  /**the heading direction cells**/
+  8(o){P; local_mult_const  ; ,   ; ,   ; $scale8  }                     /**!!!**/
+  9(o){Q,w; weight_list_feed    ; 3   ; P   ;     }                         /** only  **/
+  9(o){S,w; weight_list_feed    ; 8   ; P   ;     }                         /**observe**/
+ }
+ sw (0; 1; order) {
+  9(o){Q; local_mult_const  ; ,   ; ,   ; 1.0}
+  9(o){O; local_sum         ; ,   ; Q, S;     }
+  9(o){O; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+  6(o){O,w; weight_list_feed    ; 9   ;     ;     }
+  6(t){O; total_winner      ;     ;     ; 1, 1.0}                       /**only theoretically ... (for display reasons ...)**/
+  6(t){O; total_scan_coord  ;     ;     ; 2   }                         /**write the 4 motor values to same file as above**/
+/*6(o){S,w; weight_list_feed    ; 9   ; O   ;     }*/                                                                                /**to obtain the errors**/
+ }
+
+
+ if (iter % 100)
+ sw (0; 1; alltime) {
+  3(o){T,d; observe_act     ;     ;     ;      }
+  6(o){T,d; observe_act     ;     ;     ;      }
+  8(o){T,d; observe_act     ;     ;     ;      }
+  9(o){T,d; observe_act     ;     ;     ;      }
+  3(o){N,d; observe_act     ;     ;     ;      }
+  6(o){N,d; observe_act     ;     ;     ;      }
+  8(o){N,d; observe_act     ;     ;     ;      }
+  9(o){N,d; observe_act     ;     ;     ;      }
+  9(o){M,d; observe_act     ;     ;     ;      }
+  9(o){Q,d; observe_act     ;     ;     ;      }
+  9(o){R,d; observe_act     ;     ;     ;      }
+  9(o){S,d; observe_act     ;     ;     ;      }
+ }
+/*
+ if (iter % 500)
+ sw (0; 1; alltime) {
+  9(n){N,w+d; weight_list_export; 3;    ;      }
+  9(n){N,w+d; weight_list_export; 6;    ;      }
+  9(n){N,w+d; weight_list_export; 8;    ;      }
+  3(n){N,w+d; weight_list_export; 9;    ;      }
+  6(n){N,w+d; weight_list_export; 9;    ;      }
+  8(n){N,w+d; weight_list_export; 9;    ;      }
+ }
+*/
+}
+
+
+
+
+ /**lateral attractor weights V (separate relaxation with WAKE data)**/
+ /**the relaxation dynamics might solve the problem of conflicting BU inputs from motor, angle and location ... !**/
+ /**might relax together with motor output area 6, because the classification is relevant w.r.t. the motor output anyway ... !**/
+
+series (1) {
+ if ($importV = 0)
+ sw (0; 1; alltime) {
+  3(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  6(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  8(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+  9(n) {N,v; weight_list_alloc_full; 3    ;   ; -0.01+0.01}   /****/
+  9(n) {N,v; weight_list_alloc_full; 6    ;   ; -0.01+0.01}   /****/
+  9(n) {N,v; weight_list_alloc_full; 8    ;   ; -0.01+0.01}   /****/
+
+  3(n) {N,v; weight_list_alloc_full; 3    ;   ; -0.01+0.01}   /****/
+  6(n) {N,v; weight_list_alloc_full; 6    ;   ; -0.01+0.01}   /****/
+  8(n) {N,v; weight_list_alloc_full; 8    ;   ; -0.01+0.01}   /****/
+  9(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}   /****/
+ }
+ if ($importV = 0)
+ sw (0; 1; order) {
+  3(o){N,v; weight_list_cutself;     ;      ;     }
+  6(o){N,v; weight_list_cutself;     ;      ;     }
+  8(o){N,v; weight_list_cutself;     ;      ;     }
+  9(o){N,v; weight_list_cutself;     ;      ;     }
+ }
+
+ if ($importV = 1)
+ sw (0; 1; alltime) {
+  3(n) {N,v+d; weight_list_alloc_import; 9;   ;    }
+  6(n) {N,v+d; weight_list_alloc_import; 9;   ;    }
+  8(n) {N,v+d; weight_list_alloc_import; 9;   ;    }
+  9(n) {N,v+d; weight_list_alloc_import; 3;   ;    }
+  9(n) {N,v+d; weight_list_alloc_import; 6;   ;    }
+  9(n) {N,v+d; weight_list_alloc_import; 8;   ;    }
+
+  3(n) {N,v+d; weight_list_alloc_import; 3;   ;    }
+  6(n) {N,v+d; weight_list_alloc_import; 6;   ;    }
+  8(n) {N,v+d; weight_list_alloc_import; 8;   ;    }
+  9(n) {N,v+d; weight_list_alloc_import; 9;   ;    }
+ }
+}
+
+
+series ($iterV) {
+
+ /**begin of copy&paste from above**/
+ sw (0; 1; order) {
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } /****/
+  7(t){P  ; total_init_coord; 5   ; R   ;16+24, 50, 0.0} /**init random new (x,y,phi), if R != 0, else leave as is <- make sure orange visible; set phi = 0 for simplicity!**/
+
+  /*7(t){P  ; total_scan_coord;     ;     ; 1, 16+24, 16+24, 0.0}*/       /**angles tested: 0.0, 0.4363323, -0.4363323**/
+
+  4(t){P  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){K,w; weight_list_feed; 4   ; P   ;      } /**Eq.2:  critic activation at time t**/
+        
+  6(o){N,w; weight_list_feed; 4   ; P   ;      } /**Eq. before 9: actor inner activation**/
+  6(t){M  ; total_rand_winner;    ; N   ;      } /**Eq.9:  choose action stochastically**/
+
+  /*6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}*/
+  /*6(t){M  ; total_scan_coord;     ;     ; 2    } */
+
+  6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}
+
+  7(t){Q  ; total_move_coord; 6+7 ; M+P ; 0.9+0.1} /**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/
+  4(t){Q  ; total_angl_coord; 7   ;     ;$sigma+$sigang,$numang+$maxang} /**compute the perceived orange**/
+  5(o){R  ; feed_dock_reward; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,8.0} /**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; 0.0 for nicer presentation**/
+ }
+
+ /**WAKE: TD weights W_(368)9 learn**/
+ sw (0; 1; order) {
+  3(t){T; total_imag_coord  ; 7   ; P   ;1, $sigma}                     /**compute the perceived orange (on the original "where" area, NOT on the angle-blown-up input)**/
+  3(o){T; local_mult_const  ; ,   ; ,   ; $scale3 }                     /**!!!**/
+  6(o){T; local_copy        ; ,   ; M,  ;         }                     /**the action**/
+  6(o){T; local_mult_const  ; ,   ; ,   ; $scale6 }                     /**!!!**/
+  8(t){T; total_imag_coord  ; 7   ; P   ;2, $sigang, $numang+$maxang}   /**the heading direction cells**/
+  8(o){T; local_mult_const  ; ,   ; ,   ; $scale8 }                     /**!!!**/
+ }
+
+ sw (0; 1; order) {
+  9(o){T,w; weight_list_feed;3+6+8;T+T+T;     }
+
+  9(o){T; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+ }
+ /**end of copy&paste from above**/
+
+ sw (0; 1; order) {
+  3(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**just for consistency with the 2 lines below**/
+  6(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**because value was previously multiplied by scale6>1**/
+  8(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**because value was previously multiplied by scale8>1**/
+ }
+
+ sw (0; 1; order) {
+  9(o){P,v; weight_list_feed;3+6+8+9;O+O+O+O; }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+  3(o){P,v; weight_list_feed; 9+3 ; O+O ;     }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+  6(o){P,v; weight_list_feed; 9+6 ; O+O ;     }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+  8(o){P,v; weight_list_feed; 9+8 ; O+O ;     }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+ }
+
+ sw (0; 1; order) { /**attention: it may not work to learn only at the last step, because the pre-synaptic value might be too small!!!**/
+/*9(o){N,v; weight_list_decay ; 3+6+8+9;     ; $dectimesepsV }*/
+/*3(o){N,v; weight_list_decay ; 3+9    ;     ; $dectimesepsV }*/
+/*6(o){N,v; weight_list_decay ; 6+9    ;     ; $dectimesepsV }*/
+/*8(o){N,v; weight_list_decay ; 8+9    ;     ; $dectimesepsV }*/
+
+  9(o){K; local_sub         ; ,   ; T, P;     }
+  3(o){K; local_sub         ; ,   ; T, P;     }
+  6(o){K; local_sub         ; ,   ; T, P;     }      /**to plot the lat errors K (continuous) with init on area 6**/
+  8(o){K; local_sub         ; ,   ; T, P;     }
+/*9(o){N,v; weight_list_hebb;,3+6+8+9;K,O+O+O+O; $epsV}*/
+/*3(o){N,v; weight_list_hebb; ,9+3;K,O+O; $epsV}*/
+/*6(o){N,v; weight_list_hebb; ,9+6;K,O+O; $epsV}*/
+/*8(o){N,v; weight_list_hebb; ,9+8;K,O+O; $epsV}*/
+
+  9(o){Q,v; weight_list_feed ; 3   ; P   ;     }                         /** only  **/    /**here  at**/
+  9(o){R,v; weight_list_feed ; 6   ; P   ;     }                         /**  for  **/    /**separate time**/
+  9(o){S,v; weight_list_feed ; 8   ; P   ;     }                         /**observe**/    /**from above**/
+ }
+
+ sw (0; 1; order) {
+  9(o){O; local_copy        ; ,   ; T,  ;     }                         /**      the       **/
+  3(o){O; local_copy        ; ,   ; T,  ;     }                         /**      old       **/
+  6(o){O; local_copy        ; ,   ; T,  ;     }                         /**  activations   **/
+  8(o){O; local_copy        ; ,   ; T,  ;     }                         /**for earlier init**/
+ }
+
+set rset 9
+set rlen 10
+
+ /**only for observe**/
+ sw (1; $rlen; order) {
+  9(o){P,v; weight_list_feed;3+6+8+9;+++; -1 }
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}
+  3(o){P,v; weight_list_feed; 9+3 ; +   ; -1 }
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}
+  6(o){P,v; weight_list_feed; 9+6 ; +   ; -1 }
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}
+  8(o){P,v; weight_list_feed; 9+8 ; +   ; -1 }
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}
+ }
+
+
+
+[
+ /**to plot the lat errors L (continuous) if NO init on area 6, but during training -- comment this out to plot the training errors, i.e. with correct area 6 init**/
+ sw (0; 1; order) {
+  9(o){P  ; local_const       ; ,   ; ,   ; 0.0 }
+  3(o){P  ; local_copy        ; ,   ; T,  ;     }
+  6(o){P  ; local_const       ; ,   ; ,   ; 0.0 }
+  8(o){P  ; local_copy        ; ,   ; T,  ;     }
+ }
+ sw (1; $rlen; order) {
+  3(o){P  ; single_copy       ;     ;     ; -1  }                         /**clamping the other inputs!**/
+  8(o){P  ; single_copy       ;     ;     ; -1  }                         /**(better performance than unclamped)**/
+ }
+ sw (1; $rlen; propto) {
+  9(o){P,v; weight_list_feed  ;3+6+8+9;+++; -1  }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P  ; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+  6(o){P,v; weight_list_feed  ; 9+6 ; +   ; -1  }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P  ; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+ }
+ sw (0; $rlen; order) {
+  6(t){L  ; total_copy_back   ;     ; P   ;     }
+ }
+ sw (0; 1; order) {
+  6(o){L  ; local_sub         ; ,   ; T, L;     }
+ }
+]
+
+
+ /**test whether the "lateral" weights V can reconstruct the optimal motor output**/
+ /**areas 3 and 8 clamped <-- better than totally free running relaxation!**/
+ sw (0; 1; order) {
+  7(t){T  ; total_scan_coord  ;     ;     ; 1, 16+24, 16+24, 0.43633231}/**/ /**init x,y on grid given phi; write to file**/ /**comment this line OUT to obtain the errors!**/
+/*7(o){T  ; local_copy        ; ,   ; P,  ;          }*/                      /**comment this line IN to obtain the errors!**/
+  3(t){T  ; total_imag_coord  ; 7   ;     ; 1, $sigma}                    /**compute the perceived orange**/
+  3(o){T  ; local_mult_const  ; ,   ; ,   ; $scale3  }                    /**!!!**/
+  8(t){T  ; total_imag_coord  ; 7   ;     ; 2, $sigang, $numang+$maxang}  /**the heading direction cells**/
+  8(o){T  ; local_mult_const  ; ,   ; ,   ; $scale8  }                    /**!!!**/
+  9(o){T,w; weight_list_feed  ;3+8  ;T+T  ;     }
+  9(o){T  ; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+ }
+ sw (1; $rlen; order) {
+  9(o){T  ; single_copy       ;     ; T   ; -1  }    /**target values for whole sequence -- here just for display**/
+  3(o){T  ; single_copy       ;     ; T   ; -1  }    /**target values for whole sequence**/
+  8(o){T  ; single_copy       ;     ; T   ; -1  }    /**target values for whole sequence**/
+ }
+ sw (0; $rlen; order) {
+  3(o){T  ; local_rectify     ; ,   ; ,   ; 0.8+-1}  /**just for consistency with the 2 lines below**/
+  8(o){T  ; local_rectify     ; ,   ; ,   ; 0.8+-1}  /**because value was previously multiplied by scale8>1**/
+ }
+ sw (0; 1; order) {
+  9(o){P  ; local_copy        ; ,   ; T,  ;     }
+  3(o){P  ; local_copy        ; ,   ; T,  ;     }
+  6(o){P  ; local_const       ; ,   ; ,   ; 0.0 }
+  8(o){P  ; local_copy        ; ,   ; T,  ;     }
+ }
+
+ sw (1; $rlen; order) {
+  3(o){P  ; local_copy        ; ,   ; T,  ;     }                         /**clamping the other inputs!**/
+  8(o){P  ; local_copy        ; ,   ; T,  ;     }                         /**(better performance than unclamped)**/
+ }
+ sw (1; $rlen; propto) {
+  9(o){P,v; weight_list_feed;3+6+8+9;+++; -1  }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+  6(o){P,v; weight_list_feed; 9+6 ; +   ; -1  }    /**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/
+      {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}    /**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/
+ }
+
+ sw ($rset; $rlen; order) {
+  6(t){O; total_winner      ;     ; P   ; 1 ,1.0}          /**only theoretically ... (for display reasons ...)**/
+  6(t){O; total_scan_coord  ;     ;     ; 2   }                         /**write the 4 motor values to same file as above**/
+ }
+
+
+
+
+
+ if (iter % 100)
+ sw (0; $rlen; alltime) {
+  9(o){O,d; observe_act     ;     ;     ;      }
+  6(o){O,d; observe_act     ;     ;     ;      }
+  3(o){P,d; observe_act     ;     ;     ;      }
+  6(o){P,d; observe_act     ;     ;     ;      }
+  8(o){P,d; observe_act     ;     ;     ;      }
+  9(o){P,d; observe_act     ;     ;     ;      }
+ }
+ if (iter % 100)
+ sw (0; 1; alltime) {
+  3(o){T,d; observe_act     ;     ;     ;      }
+  6(o){T,d; observe_act     ;     ;     ;      }
+  8(o){T,d; observe_act     ;     ;     ;      }
+  9(o){T,d; observe_act     ;     ;     ;      }
+ }
+/*
+ if (iter % 500)
+ sw (0; 1; alltime) {
+  9(n){N,v+d; weight_list_export; 3;    ;      }
+  9(n){N,v+d; weight_list_export; 6;    ;      }
+  9(n){N,v+d; weight_list_export; 8;    ;      }
+  3(n){N,v+d; weight_list_export; 9;    ;      }
+  6(n){N,v+d; weight_list_export; 9;    ;      }
+  8(n){N,v+d; weight_list_export; 9;    ;      }
+
+  3(n){N,v+d; weight_list_export; 3;    ;      }
+  6(n){N,v+d; weight_list_export; 6;    ;      }
+  8(n){N,v+d; weight_list_export; 8;    ;      }
+  9(n){N,v+d; weight_list_export; 9;    ;      }
+ }
+*/
+}

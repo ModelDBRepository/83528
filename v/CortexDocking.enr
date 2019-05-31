@@ -1,0 +1,845 @@
+Content-Type: text/enriched
+Text-Width: 70
+
+/**
+
+
+A hybrid generative and predictive model of the motor cortex
+Cornelius Weber, Stefan Wermter and Mark Elshaw
+
+Neural Networks, 19 (4), 339-353 (2006)
+
+
+
+Usage:
+
+- Create a directory for the files:
+
+  mkdir /tmp/coco
+
+- Run the program:
+
+  ./cococo -file v/CortexDocking
+
+- View the resulting files:
+
+  ./look a w 4 5 6 7
+
+  (In look.tcl, the variable UNAME must be: /tmp/coco
+
+   Note that "look.tcl" only works after the files have been created, i.e. after start of "cococo"!)
+
+**/
+
+
+global {
+
+ iter         0
+
+ areas        10
+
+ mult         1
+
+
+ <x-color><param>blue</param>d           "/tmp/coco"</x-color>
+
+}
+
+
+
+all {
+
+ d_a          0
+
+ d_b          0
+
+}
+
+
+
+<x-color><param>DimGrey</param>/**area 4: place cells**/</x-color>
+
+area 4 {
+
+set numang    <x-color><param>firebrick</param>7</x-color>          <x-color><param>DimGrey</param>/**num_angle (don't put a space before the "set"!)**/</x-color>
+
+ d_a          <x-color><param>firebrick</param>112</x-color>        <x-color><param>DimGrey</param>/**16 * num_angle**/</x-color>
+
+ d_b          24
+
+}
+
+
+<x-color><param>DimGrey</param>/**area 5: critic -- holds value function**/</x-color>
+
+area 5 {
+
+ d_a          1
+ d_b          1
+}
+
+
+<x-color><param>DimGrey</param>/**area 7: real world coordinates -- x,y,phi**/</x-color>
+
+area 7 {
+
+ d_a          3
+ d_b          1
+}
+
+
+<x-color><param>DimGrey</param>/**area 6: actor -- steers the agent into N E S W**/</x-color>
+
+area 6 {
+
+ d_a          1
+ d_b          4
+}
+
+
+<x-color><param>DimGrey</param>/**area 3: the perceived Gaussian in NON-blown-up coordinates**/</x-color>
+
+area 3 {
+
+ d_a          16
+
+ d_b          24
+
+}
+
+
+<x-color><param>DimGrey</param>/**area 8: phi as Gaussian -- HD cells -- angle input for the cortex**/</x-color>
+
+area 8 {
+
+ d_a          7
+
+ d_b          1
+
+}
+
+
+<x-color><param>DimGrey</param>/**area 9: motor cortex -- its input is (i) the perceived location from area 3, (ii) the angle from area 9 and (iii) the motor output from area 6**/</x-color>
+
+area 9 {
+
+ d_a          16
+
+ d_b          16
+
+}
+
+
+
+
+<x-color><param>DimGrey</param>/**Actor-Critic**/</x-color>
+
+set iterWreinforce   1000000       <x-color><param>DimGrey</param>/**1000000**/</x-color>
+
+<x-color><param>DarkGreen</param>set importWreinforce 0
+
+
+</x-color><x-color><param>DimGrey</param>/**Helmholtz Machine**/</x-color>
+
+set iterWbu          200000        <x-color><param>DimGrey</param>/**200000**/</x-color><x-color><param>DarkGreen</param>
+
+set importWbu        0</x-color>
+
+<x-color><param>DarkGreen</param>set epsWbu           0.01
+
+set dectimesepsWbu   0.00015
+
+
+</x-color><x-color><param>DimGrey</param>/**Lateral Predictive Weights**/</x-color>
+
+set iterV            100000       <x-color><param>DimGrey</param>/**100000**/</x-color>
+
+<x-color><param>DarkGreen</param>set importV          0</x-color>
+
+<x-color><param>DarkGreen</param>set epsV             0.01
+
+set dectimesepsV     0.00001
+
+</x-color>
+
+
+series (1) {
+
+ if (<x-color><param>DarkGreen</param>$importWreinforce</x-color> = 0)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>5(n) {N,w; weight_list_alloc_full; 4    ;   ; -0.01+0.01}</x-color> <x-color><param>DimGrey</param>/**critic weights**/</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,w; weight_list_alloc_full; 4    ;   ; -0.01+0.01}</x-color> <x-color><param>DimGrey</param>/**actor weights**/</x-color>
+
+ }
+
+ if (<x-color><param>DarkGreen</param>$importWreinforce</x-color> = 1)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>5(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 4;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 4;   ;    }</x-color>
+
+ }
+
+
+ sw (0; 1; order) {
+
+  5(o){R; local_const       ; ,   ; ,   ; 1.0 } <x-color><param>DimGrey</param>/**so that total_init_coord chooses a new position**/</x-color>
+
+
+  9(o){O; local_const       ; ,   ; ,   ; 0.0 }              <x-color><param>DimGrey</param>/**    init   **/</x-color>
+
+  3(o){O; local_const       ; ,   ; ,   ; 0.0 }              <x-color><param>DimGrey</param>/**    the    **/</x-color>
+
+  6(o){O; local_const       ; ,   ; ,   ; 0.0 }              <x-color><param>DimGrey</param>/**    old    **/</x-color>
+
+  8(o){O; local_const       ; ,   ; ,   ; 0.0 }              <x-color><param>DimGrey</param>/**activations**/</x-color>
+
+ }
+
+}
+
+
+
+set sigma  1.5
+
+set sigang 0.5
+
+set maxang 0.78539816  <x-color><param>DimGrey</param>/**PI/4**/</x-color>
+
+set gamma  0.9
+
+
+
+<x-color><param>DimGrey</param>/**training of the reinforcement module to perform the docking**/</x-color>
+
+<x-color><param>DimGrey</param>/**</x-color><x-color><param>saddle brown</param>total_init_coord</x-color><x-color><param>DimGrey</param> places the agent to a new starting position whenever R!=0, i.e. when a reward is given or when agent out of boundaries (set by </x-color><x-color><param>saddle brown</param>feed_dock_reward</x-color><x-color><param>DimGrey</param>).**/</x-color>
+
+<x-color><param>DimGrey</param>/**The agent coordinates are traced on area 7, from which the input on other areas can be computed.**/</x-color>
+
+series ($iterWreinforce) {
+
+
+ sw (0; 1; order) {
+
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } <x-color><param>DimGrey</param>/****/</x-color>
+
+  7(t){P  ; <x-color><param>saddle brown</param>total_init_coord</x-color>; 5   ; R   ;16+24, <x-color><param>red</param>50</x-color>, 0.0} <x-color><param>DimGrey</param>/**init random new (x,y,phi), if R != 0, else leave as is <<- make sure orange visible; set phi = 0 for simplicity!**/</x-color>
+
+  4(t){P  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){K,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq.2:  critic activation at time t**/</x-color>
+
+        
+
+  6(o){N,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq. before 9: actor inner activation**/</x-color>
+  6(t){M  ; <x-color><param>saddle brown</param>total_rand_winner</x-color>;    ; N   ;      } <x-color><param>DimGrey</param>/**Eq.9:  choose action stochastically**/</x-color>
+  <x-color><param>DeepSkyBlue2</param>6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}</x-color>
+
+
+  7(t){Q  ; <x-color><param>saddle brown</param>total_move_coord</x-color>; 6+7 ; M+P ; 0.9+0.1} <x-color><param>DimGrey</param>/**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/</x-color>
+  4(t){Q  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){R  ; <x-color><param>saddle brown</param>feed_dock_reward</x-color>; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,<underline>8.0</underline>} <x-color><param>DimGrey</param>/**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; </x-color><underline>0.0</underline><x-color><param>DimGrey</param> for nicer presentation**/</x-color>
+
+
+  5(o){L,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; Q   ;      } <x-color><param>DimGrey</param>/**Eq.2:  critic activation at time t+1             **/</x-color>
+  5(o){L  ; local_mult_const; ,   ; ,   ;$gamma} <x-color><param>DimGrey</param>/**Eq.7:  discount factor gamma                     \    compute **/</x-color>
+  5(o){T  ; local_sub       ; ,   ; L, K;      } <x-color><param>DimGrey</param>/**Eq.7:  difference critic act at t+1 minus at t    |   delta   **/</x-color>
+  5(o){T  ; local_sum       ; ,   ; R,  ;      } <x-color><param>DimGrey</param>/**Eq.7:  add reward                                /            **/</x-color>
+
+  6(t){T  ; total_spread_xy ; 5   ;     ; 2    } <x-color><param>DimGrey</param>/**                      delta on all action units  **/</x-color>
+  6(o){O  ; local_mult      ; ,   ; T, M;      } <x-color><param>DimGrey</param>/**Eq.10: delta * g_j    delta on active action unit**/</x-color>
+
+  <x-color><param>DarkGreen</param>5(o){N,w; weight_list_hebb; 5, 4; T, P; 0.1  }</x-color> <x-color><param>DimGrey</param>/**Eq.8:  delta * f_i(p_t)                          **/</x-color><x-color><param>DarkGreen</param>
+  6(o){N,w; weight_list_hebb; 6, 4; O, P; 0.1  }</x-color> <x-color><param>DimGrey</param>/**Eq.10: (delta*g_j) * f_i(p_t)                    **/</x-color>
+
+
+  <x-color><param>red</param>4(t){R; total_pause     ;     ;     ;  0  } /**in ms**/</x-color>
+
+ }
+
+
+ if (iter % 100)
+
+ sw (0; 1; alltime) {
+
+  4(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  4(o){Q,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  5(o){R,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  5(o){L,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){N,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){M,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  7(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  7(o){Q,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  <x-color><param>DarkGreen</param>6(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 4;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>5(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 4;    ;      }</x-color>
+
+ }
+
+}
+
+
+
+
+
+
+series (1) {
+
+ if (<x-color><param>DarkGreen</param>$importWbu</x-color> = 0)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>3(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,w; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w; weight_list_alloc_full; 3    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w; weight_list_alloc_full; 6    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w; weight_list_alloc_full; 8    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+ }
+
+ if (<x-color><param>DarkGreen</param>$importWbu</x-color> = 1)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>3(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 3;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 6;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 8;   ;    }</x-color>
+
+ }
+
+}
+
+
+<x-color><param>DimGrey</param>/**training of the motor cortex (only HM, i.e. BU/TD, not lateral yet)**/</x-color>
+
+
+set scale3 1.0    /**was 1.0**/
+
+set scale6 1.0    /**was 2.0**/
+
+set scale8 2.0    /**was 1.5**/
+
+
+series ($iterWbu) {
+
+
+ sw (0; 1; order) {
+
+  <x-color><param>DarkGreen</param>3(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}</x-color>  <x-color><param>DimGrey</param>/** all weights W **/</x-color>
+
+  <x-color><param>DarkGreen</param>6(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}</x-color>  <x-color><param>DimGrey</param>/**     are       **/</x-color>
+
+  <x-color><param>DarkGreen</param>8(o){N,w; weight_list_rectify;  9  ;      ; 0.0, 1}</x-color>  <x-color><param>DimGrey</param>/**   positive    **/</x-color>
+
+  <x-color><param>DarkGreen</param>9(o){N,w; weight_list_rectify;3+6+8; ++   ; 0.0, 1}</x-color>  <x-color><param>DimGrey</param>/**     only      **/</x-color>
+
+<x-color><param>DarkGreen</param> }</x-color>
+
+
+ sw (0; 1; order) {
+
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } <x-color><param>DimGrey</param>/****/</x-color>
+
+  7(t){P  ; <x-color><param>saddle brown</param>total_init_coord</x-color>; 5   ; R   ;16+24, <x-color><param>red</param>50</x-color>, 0.0} <x-color><param>DimGrey</param>/**init random new (x,y,phi), if R != 0, else leave as is <<- make sure orange visible; set phi = 0 for simplicity!**/</x-color>
+
+  4(t){P  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){K,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq.2:  critic activation at time t**/</x-color>
+
+        
+
+  6(o){N,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq. before 9: actor inner activation**/</x-color>
+  6(t){M  ; <x-color><param>saddle brown</param>total_rand_winner</x-color>;    ; N   ;      } <x-color><param>DimGrey</param>/**Eq.9:  choose action stochastically**/</x-color>
+  <x-color><param>DeepSkyBlue2</param>6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}</x-color>
+
+
+  7(t){Q  ; <x-color><param>saddle brown</param>total_move_coord</x-color>; 6+7 ; M+P ; 0.9+0.1} <x-color><param>DimGrey</param>/**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/</x-color>
+  4(t){Q  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){R  ; <x-color><param>saddle brown</param>feed_dock_reward</x-color>; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,<underline>8.0</underline>} <x-color><param>DimGrey</param>/**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; </x-color><underline>0.0</underline><x-color><param>DimGrey</param> for nicer presentation**/</x-color>
+
+ }
+
+
+ <x-color><param>DimGrey</param>/**WAKE: TD weights W_(368)9 learn**/</x-color>
+
+ sw (0; 1; order) {
+  3(t){T; <x-color><param>saddle brown</param>total_imag_coord  </x-color>; 7   ; P   ;1, $sigma}                     <x-color><param>DimGrey</param>/**compute the perceived orange (on the original "where" area, NOT on the angle-blown-up input)**/</x-color>
+  3(o){T; local_mult_const  ; ,   ; ,   ; $scale3 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+  6(o){T; local_copy        ; ,   ; M,  ;         }                     <x-color><param>DimGrey</param>/**the action**/</x-color>
+  6(o){T; local_mult_const  ; ,   ; ,   ; $scale6 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+  8(t){T; <x-color><param>saddle brown</param>total_imag_coord</x-color>  ; 7   ; P   ;2, $sigang, $numang+$maxang}   <x-color><param>DimGrey</param>/**the heading direction cells**/</x-color>
+  8(o){T; local_mult_const  ; ,   ; ,   ; $scale8 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+ }
+
+
+ sw (0; 1; order) {
+
+  9(o){T,w; weight_list_feed;3+6+8;T+T+T;     }
+
+
+  9(o){Q,w; weight_list_feed; 3   ; T   ;     }                         <x-color><param>DimGrey</param>/** only  **/</x-color>
+
+  9(o){R,w; weight_list_feed; 6   ; T   ;     }                         <x-color><param>DimGrey</param>/**  for  **/</x-color>
+
+  9(o){S,w; weight_list_feed; 8   ; T   ;     }                         <x-color><param>DimGrey</param>/**observe**/</x-color>
+
+
+  <x-color><param>medium violet red</param>9(o){T; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}</x-color>
+
+
+  3(o){S,w; weight_list_feed; 9   ; T   ;     }
+
+  3(o){R; local_sub         ; ,   ; T, S;     }
+
+  <x-color><param>DarkGreen</param>3(o){N,w; weight_list_hebb; 3, 9; R, T; $epsWbu}</x-color>
+
+  6(o){S,w; weight_list_feed; 9   ; T   ;     }
+
+  6(o){R; local_sub <x-bg-color><param>cyan</param>       </x-bg-color> ; ,   ; T, S;     }      <x-bg-color><param>cyan</param>/**to plot the TD errors R (continuous) with init on area 6**/</x-bg-color>
+
+  <x-color><param>DarkGreen</param>6(o){N,w; weight_list_hebb; 6, 9; R, T; $epsWbu}</x-color>
+
+  8(o){S,w; weight_list_feed; 9   ; T   ;     }
+
+  8(o){R; local_sub         ; ,   ; T, S;     }
+
+  <x-color><param>DarkGreen</param>8(o){N,w; weight_list_hebb; 8, 9; R, T; $epsWbu}</x-color>
+
+
+  <x-color><param>medium violet red</param>3(o){N,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 9   ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsWbu</x-color><x-color><param>medium violet red</param> }</x-color>
+
+  <x-color><param>medium violet red</param>6(o){N,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 9   ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsWbu</x-color><x-color><param>medium violet red</param> }</x-color>
+
+  <x-color><param>medium violet red</param>8(o){N,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 9   ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsWbu</x-color><x-color><param>medium violet red</param> }</x-color>
+
+ }
+
+
+
+<x-bg-color><param>cyan</param> /**to plot the TD errors S (continuous) if NO init on area 6, but during testing -- comment this out to plot the training errors, i.e. with correct area 6 init**/
+
+ sw (0; 1; order) {
+
+  9(o){L,w; weight_list_feed    ;3+8;T+T;     }
+
+  9(o){L; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}
+
+  6(o){S,w; weight_list_feed    ; 9   ; L   ;     }
+
+  6(o){S; local_sub</x-bg-color> <x-bg-color><param>cyan</param>       </x-bg-color> <x-bg-color><param>cyan</param>; ,   ; T, S;     }
+
+ }
+
+</x-bg-color>
+
+
+<x-color><param>DimGrey</param>/**SLEEP: BU weights W_9(368) learn**/</x-color>
+
+ sw (0; 1; order) {
+
+  9(t){N; total_topo_gibbs_01;,   ; ,   ; 10+0.75, 1.0+1.0, 1}    <x-color><param>DimGrey</param>/**init sleep phantasy**/</x-color>
+
+  3(o){N,w; weight_list_feed; 9   ;     ;     }
+
+  6(o){N,w; weight_list_feed; 9   ;     ;     }
+
+  8(o){N,w; weight_list_feed; 9   ;     ;     }
+
+  9(o){M,w; weight_list_feed;3+6+8;N+N+N;     }
+
+  <x-color><param>medium violet red</param>9(o){M; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}</x-color>
+
+  9(o){N; local_sub         ; ,   ; N, M;     }
+
+  <x-color><param>DarkGreen</param>9(o){N,w; weight_list_hebb;9,3+6+8;N,N+N+N; $epsWbu}</x-color>
+
+  <x-color><param>medium violet red</param>9(o){N,</x-color><x-color><param>DarkGreen</param>w</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ;3+6+8; ,   ; </x-color><x-color><param>DarkGreen</param>$dectimesepsWbu</x-color><x-color><param>medium violet red</param>}</x-color>
+
+ }
+
+
+
+ if (iter % 100)
+
+ sw (0; 1; alltime) {
+
+  3(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  8(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  3(o){N,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){N,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  8(o){N,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){N,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){M,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){Q,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){R,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){S,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+ }
+
+ if (iter % 500)
+
+ sw (0; 1; alltime) {
+
+  <x-color><param>DarkGreen</param>9(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 3;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 6;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 8;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>3(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n){N,w+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+ }
+
+
+}
+
+
+
+
+
+ <x-color><param>DimGrey</param>/**lateral attractor weights V (separate relaxation with WAKE data)**/</x-color>
+
+ <x-color><param>DimGrey</param>/**the relaxation dynamics might solve the problem of conflicting BU inputs from motor, angle and location ... !**/
+
+ /**might relax together with motor output area 6, because the classification is relevant w.r.t. the motor output anyway ... !**/</x-color>
+
+
+series (1) {
+
+ if (<x-color><param>DarkGreen</param>$importV</x-color> = 0)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>3(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v; weight_list_alloc_full; 3    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v; weight_list_alloc_full; 6    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v; weight_list_alloc_full; 8    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+
+  <x-color><param>DarkGreen</param>3(n) {N,v; weight_list_alloc_full; 3    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,v; weight_list_alloc_full; 6    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,v; weight_list_alloc_full; 8    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v; weight_list_alloc_full; 9    ;   ; -0.01+0.01}</x-color>   <x-color><param>DimGrey</param>/****/</x-color>
+
+ }
+
+ if (<x-color><param>DarkGreen</param>$importV</x-color> = 0)
+
+ sw (0; 1; order) {
+
+<x-color><param>DarkGreen</param>  3(o){N,v; weight_list_cutself;     ;      ;     }
+
+  6(o){N,v; weight_list_cutself;     ;      ;     }
+
+  8(o){N,v; weight_list_cutself;     ;      ;     }
+
+  9(o){N,v; weight_list_cutself;     ;      ;     }
+
+ }</x-color>
+
+
+ if (<x-color><param>DarkGreen</param>$importV</x-color> = 1)
+
+ sw (<x-color><param>red</param>0</x-color>; <x-color><param>red</param>1</x-color>; alltime) {
+
+  <x-color><param>DarkGreen</param>3(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 3;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 6;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 8;   ;    }</x-color>
+
+
+  <x-color><param>DarkGreen</param>3(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 3;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 6;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 8;   ;    }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n) {N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_alloc_import; 9;   ;    }</x-color>
+
+ }
+
+}
+
+
+
+series ($iterV) {
+
+
+ /**begin of copy&paste from above**/
+
+ sw (0; 1; order) {
+
+  7(o){P  ; local_copy      ; ,   ; Q,  ;      } <x-color><param>DimGrey</param>/****/</x-color>
+
+  7(t){P  ; <x-color><param>saddle brown</param>total_init_coord</x-color>; 5   ; R   ;16+24, <x-color><param>red</param>50</x-color>, 0.0} <x-color><param>DimGrey</param>/**init random new (x,y,phi), if R != 0, else leave as is <<- make sure orange visible; set phi = 0 for simplicity!**/</x-color>
+
+  4(t){P  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){K,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq.2:  critic activation at time t**/</x-color>
+
+        
+
+  6(o){N,<x-color><param>DarkGreen</param>w</x-color>; weight_list_feed; 4   ; P   ;      } <x-color><param>DimGrey</param>/**Eq. before 9: actor inner activation**/</x-color>
+  6(t){M  ; <x-color><param>saddle brown</param>total_rand_winner</x-color>;    ; N   ;      } <x-color><param>DimGrey</param>/**Eq.9:  choose action stochastically**/</x-color>
+  <x-color><param>DeepSkyBlue2</param>6(t){M  ; total_winner    ;     ; N   ; 1, 1.0}</x-color>
+
+
+  7(t){Q  ; <x-color><param>saddle brown</param>total_move_coord</x-color>; 6+7 ; M+P ; 0.9+0.1} <x-color><param>DimGrey</param>/**old position P and action M (q_00~velocity,q_01~angularvelocity) -> new position Q**/</x-color>
+  4(t){Q  ; <x-color><param>saddle brown</param>total_angl_coord</x-color>; 7   ;     ;$sigma+$sigang,$numang+$maxang} <x-color><param>DimGrey</param>/**compute the perceived orange**/</x-color>
+
+  5(o){R  ; <x-color><param>saddle brown</param>feed_dock_reward</x-color>; 4,7 ; Q,Q ;15+11,$numang+16+24,2+0,-0.3,<underline>8.0</underline>} <x-color><param>DimGrey</param>/**set reward R=1 at target pos q_00+q_01, and R = q_30 at boundary; </x-color><underline>0.0</underline><x-color><param>DimGrey</param> for nicer presentation**/</x-color>
+
+ }
+
+
+ <x-color><param>DimGrey</param>/**WAKE: TD weights W_(368)9 learn**/</x-color>
+
+ sw (0; 1; order) {
+  3(t){T; <x-color><param>saddle brown</param>total_imag_coord  </x-color>; 7   ; P   ;1, $sigma}                     <x-color><param>DimGrey</param>/**compute the perceived orange (on the original "where" area, NOT on the angle-blown-up input)**/</x-color>
+  3(o){T; local_mult_const  ; ,   ; ,   ; $scale3 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+  6(o){T; local_copy        ; ,   ; M,  ;         }                     <x-color><param>DimGrey</param>/**the action**/</x-color>
+  6(o){T; local_mult_const  ; ,   ; ,   ; $scale6 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+  8(t){T; <x-color><param>saddle brown</param>total_imag_coord</x-color>  ; 7   ; P   ;2, $sigang, $numang+$maxang}   <x-color><param>DimGrey</param>/**the heading direction cells**/</x-color>
+  8(o){T; local_mult_const  ; ,   ; ,   ; $scale8 }                     <x-color><param>DimGrey</param>/**</x-color><x-color><param>red</param>!!!</x-color><x-color><param>DimGrey</param>**/</x-color>
+ }
+
+
+ sw (0; 1; order) {
+
+  9(o){T,w; weight_list_feed;3+6+8;T+T+T;     }
+
+
+  <x-color><param>medium violet red</param>9(o){T; local_mean_01     ; ,   ; ,   ; 64+2.0+0+0+1}</x-color>
+
+ }
+
+ /**end of copy&paste from above**/
+
+
+ sw (0; 1; order) {
+
+  3(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**just for consistency with the 2 lines below**/
+  6(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**because value was previously multiplied by scale6>1**/
+  8(o){T; local_rectify     ; ,   ; ,   ; 0.8+-1}   /**because value was previously multiplied by scale8>1**/
+ }
+
+
+ sw (0; 1; <underline>order) {</underline>
+
+  9(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed;3+6+8+9;O+O+O+O; }    <x-color><param>DimGrey</param>/**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/</x-color>
+
+      {<x-color><param>medium violet red</param>P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>    <x-color><param>DimGrey</param>/**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/</x-color>
+  3(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+3 ; O+O ;     }    <x-color><param>DimGrey</param>/**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/</x-color>
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>    <x-color><param>DimGrey</param>/**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/</x-color>
+  6(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+6 ; O+O ;     }    <x-color><param>DimGrey</param>/**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/</x-color>
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>    <x-color><param>DimGrey</param>/**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/</x-color>
+  8(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+8 ; O+O ;     }    <x-color><param>DimGrey</param>/**see 06.gaussequence.enr for average between BU & lateral input -- related to prediction !**/</x-color>
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>    <x-color><param>DimGrey</param>/**works more robustly with kurt=8 instead of 64 as for BU cells -- 0.7 trick to keep act's high!**/</x-color>
+ }
+
+
+ sw (0; 1; order) { /**attention: it may not work to learn only at the last step, because the pre-synaptic value might be too small!!!**/
+
+  <x-color><param>medium violet red</param>9(o){N,</x-color><x-color><param>DarkGreen</param>v</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 3+6+8+9;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsV</x-color><x-color><param>medium violet red</param> }</x-color>
+
+  <x-color><param>medium violet red</param>3(o){N,</x-color><x-color><param>DarkGreen</param>v</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 3+9    ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsV</x-color><x-color><param>medium violet red</param> }</x-color>
+
+  <x-color><param>medium violet red</param>6(o){N,</x-color><x-color><param>DarkGreen</param>v</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 6+9    ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsV</x-color><x-color><param>medium violet red</param> }</x-color>
+
+  <x-color><param>medium violet red</param>8(o){N,</x-color><x-color><param>DarkGreen</param>v</x-color><x-color><param>medium violet red</param>; weight</x-color><x-color><param>DarkGreen</param>_list</x-color><x-color><param>medium violet red</param>_decay ; 8+9    ;     ; </x-color><x-color><param>DarkGreen</param>$dectimesepsV</x-color><x-color><param>medium violet red</param> }</x-color>
+
+
+  9(o){K; local_sub         ; ,   ; T, P;     }
+
+  3(o){K; local_sub         ; ,   ; T, P;     }
+
+  6(o){K; local_sub <x-bg-color><param>cyan</param>       </x-bg-color> ; ,   ; T, P;     }      <x-bg-color><param>cyan</param>/**to plot the lat errors K (continuous) with init on area 6**/</x-bg-color>
+
+  8(o){K; local_sub         ; ,   ; T, P;     }
+
+<x-color><param>DarkGreen</param>  9(o){N,v; weight_list_hebb;,3+6+8+9;K,O+O+O+O; $epsV}
+
+  3(o){N,v; weight_list_hebb; ,9+3;K,O+O; $epsV}
+
+  6(o){N,v; weight_list_hebb; ,9+6;K,O+O; $epsV}
+
+  8(o){N,v; weight_list_hebb; ,9+8;K,O+O; $epsV}
+
+</x-color>
+
+  9(o){Q,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed ; 3   ; P   ;     }                         <x-color><param>DimGrey</param>/** only  **/    /**here  at**/</x-color>
+
+  9(o){R,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed ; 6   ; P   ;     }                         <x-color><param>DimGrey</param>/**  for  **/    /**separate time**/</x-color>
+
+  9(o){S,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed ; 8   ; P   ;     }                         <x-color><param>DimGrey</param>/**observe**/    /**from above**/</x-color>
+
+ }
+
+
+ sw (0; 1; order) {
+
+  9(o){O; local_copy        ; ,   ; T,  ;     }                         <x-color><param>DimGrey</param>/**      the       **/</x-color>
+
+  3(o){O; local_copy        ; ,   ; T,  ;     }                         <x-color><param>DimGrey</param>/**      old       **/</x-color>
+
+  6(o){O; local_copy        ; ,   ; T,  ;     }                         <x-color><param>DimGrey</param>/**  activations   **/</x-color>
+
+  8(o){O; local_copy        ; ,   ; T,  ;     }                         <x-color><param>DimGrey</param>/**for earlier init**/</x-color>
+
+ }
+
+
+set rset 9
+
+set rlen 10
+
+
+ /**only for observe**/
+
+ sw (1; $rlen; <underline>order</underline>) {
+
+  9(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed;3+6+8+9;+++; -1 }
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>
+  3(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+3 ; +   ; -1 }
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>
+  6(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+6 ; +   ; -1 }
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>
+  8(o){P,<x-color><param>DarkGreen</param>v</x-color>; weight_list_feed; 9+8 ; +   ; -1 }
+
+     <x-color><param>medium violet red</param> {P; local_mean_01     ; ,   ; ,   ; 8+2.0+0+0+0.7}</x-color>
+ }
+
+
+
+
+ if (iter % 100)
+
+ sw (0; $rlen; alltime) {
+
+  9(o){O,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){O,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  3(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  8(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){P,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+ }
+
+ if (iter % 100)
+
+ sw (0; 1; alltime) {
+
+  3(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  6(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  8(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+  9(o){T,<x-color><param>DarkGreen</param><x-color><param>blue</param>d</x-color></x-color>; observe_act     ;     ;     ;      }
+
+ }
+
+
+ if (iter % 500)
+
+ sw (0; 1; alltime) {
+
+  <x-color><param>DarkGreen</param>9(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 3;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 6;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 8;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>3(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+
+  <x-color><param>DarkGreen</param>3(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 3;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>6(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 6;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>8(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 8;    ;      }</x-color>
+
+  <x-color><param>DarkGreen</param>9(n){N,v+</x-color><x-color><param>blue</param>d</x-color><x-color><param>DarkGreen</param>; weight_list_export; 9;    ;      }</x-color>
+
+ }
+
+}
+

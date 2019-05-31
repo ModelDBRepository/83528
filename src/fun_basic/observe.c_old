@@ -1,0 +1,1271 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>     /**fuer fabs**/
+#include <string.h>   /**fuer strstr**/
+
+#include "../kernel/coco.h"
+#include "../kernel/series.h"
+/** #include "utils.h"    **fuer f_kurtosis**/
+
+/************************* exportP36_matrix **********************************/
+/* Export 1) a (weight) matrix of sizes d_x * d_y * d_a * d_b to 7) "datei". */
+/* with 6) format: 3 (integer), 6 (char), 9 (double with fwrite)             */
+
+void exportP36_matrix (double **S, int d_x, int d_y, int d_a, int d_b,
+                      int format, char datei[256]) {
+    FILE *fp;
+    int h = 2, i, j, a, b, k, hcol = 0, red, green, blue;
+    double value, maxS, highS = -1000000, lowS = 1000000;
+
+    /**compute maxS**/
+    for (i = 0; i < d_x * d_y; ++i)
+        for (j = 0; j < d_a * d_b; ++j) {
+            highS = highS > S[i][j] ? highS : S[i][j];
+            lowS  = lowS  < S[i][j] ? lowS  : S[i][j];
+        }
+    maxS  = fabs (highS) > fabs (lowS) ? fabs (highS) : fabs (lowS);
+
+    if  (format == 3)      /**integer export: all values multiplied by 10000**/
+         hcol = (int)(4500.0 * maxS);
+    if  (format == 6)     /**character export: values scaled between [0:256]**/
+         hcol = 60;
+    if  (format == 9)     /**double export: no frames**/
+         h = 0;
+
+    if  (  (datei[0] != '/') || (datei[1] != 't') || (datei[2] != 'm')
+        || (datei[3] != 'p') || (datei[4] != '/'))
+        fprintf(stderr, "\n--> %s", datei);
+
+    if  ((fp = fopen (datei, "w")) == NULL) {
+        fprintf(stderr, "\nno write file %s\n", datei);  exit(0);
+    }
+
+    /**write the Px**/
+    if  (format == 3)  fprintf (fp, "P3\n");
+    else
+       if  (format == 6)  fprintf (fp, "P6\n");
+       else
+          if  (format == 9)  fprintf (fp, "P9\n");
+          else
+              fprintf (stderr, "\nexport format must be 3 or 6 or 9\n");
+
+    /**write maxS**/
+    fprintf (fp, "# highS: %f  lowS: %f\n", highS, lowS);
+
+    /**no parameters written yet**/
+
+    /**write sizes**/
+    fprintf (fp, "%d %d\n", h + (d_b + h) * d_y, h + (d_a + h) * d_x);
+
+    /**write grey values**/
+    if  (format == 3)
+        fprintf (fp, "%d\n", (int)(10000.0 * maxS));
+    if  (format == 6)
+        fprintf (fp, "127\n");
+    if  (format == 9)
+        fprintf (fp, "1\n"); /**must write an int because import reads int!!**/
+
+    for (i = 0; i < h; ++i)                          /**1st white line**/
+        for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+            if  (format == 3)
+                fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+            if  (format == 6)
+                fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+        }
+
+    for (i = 0; i < d_x; ++i) {
+         for (a = 0; a < d_a; ++a) {
+
+             for (k = 0; k < h; ++k) {
+                 if  (format == 3)
+                     fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                 if  (format == 6)
+                     fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+             }
+
+             for (j = 0; j < d_y; ++j) {
+                 for (b = 0; b < d_b; ++b) {
+
+                         value = S[j + i * d_y][b + a * d_b];
+
+                         if  (value < 0.0) {
+                             red = (format == 3)
+                                 ? (int)(-10000.0 * value)
+                                 : (int)(-127.0 * value / maxS);
+                             green = 0;
+                             blue = 0;
+                         } else {
+                             red = 0;
+                             green = (format == 3)
+                                   ? (int)(10000.0 * value)
+                                   : (int)(127.0 * value / maxS);
+                             blue = 0;
+                         }
+
+                         if  (format == 3)
+                             fprintf (fp, "%d %d %d ", red, green, blue);
+                         if  (format == 6)
+                             fprintf (fp, "%c%c%c", red, green, blue);
+                         if  (format == 9)
+                             fwrite (&value, sizeof (double), 1 , fp);
+                 }
+
+                 for (k = 0; k < h; ++k) {
+                     if  (format == 3)
+                         fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                     if  (format == 6)
+                         fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+                 }
+	     }
+         }
+
+         for (k = 0; k < h; ++k)         /**between + last white lines**/
+             for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+                 if  (format == 3)
+                     fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                 if  (format == 6)
+                     fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+             }
+    }
+
+    fclose (fp);
+}
+
+/************************* exportP36_col *************************************/
+/* Export weight/act matrix of sizes d_x * d_y * d_a * d_b to "datei".       */
+/* Format: 3 (integer) or 6 (char).  d_a must be as RGB (3x grey).           */
+/* Used in observe_col.                                                      */
+
+void exportP36_col (double **S, int d_x, int d_y, int d_a, int d_b,
+                   int format, char datei[256]) {
+    FILE *fp;
+    int h = 2, i, j, a, b, k, hcol = 0, red, green, blue;
+    double maxS, highS = -1000000, lowS = 1000000;
+    int height;
+
+    height = d_a / 3;
+    if  (d_a % 3) {
+        fprintf (stderr, "\nUse exportP36_col only if d_a represents RGB.\n");
+        exit (0);
+    }
+
+    /**compute maxS**/
+    for (i = 0; i < d_x * d_y; ++i)
+        for (j = 0; j < d_a * d_b; ++j) {
+            highS = highS > S[i][j] ? highS : S[i][j];
+            lowS  = lowS  < S[i][j] ? lowS  : S[i][j];
+        }
+    maxS  = fabs (highS) > fabs (lowS) ? fabs (highS) : fabs (lowS);
+
+    if  (format == 3)      /**integer export: all values multiplied by 10000**/
+         hcol = (int)(4500.0 * maxS);
+    if  (format == 6)     /**character export: values scaled between [0:256]**/
+         hcol = 80;
+
+    if  (  (datei[0] != '/') || (datei[1] != 't') || (datei[2] != 'm')
+        || (datei[3] != 'p') || (datei[4] != '/'))
+        fprintf(stderr, "\n--> %s", datei);
+
+    if  ((fp = fopen (datei, "w")) == NULL) {
+        fprintf(stderr, "\nno write file %s\n", datei);  exit(0);
+    }
+
+    /**write the Px**/
+    if  (format == 3)  fprintf (fp, "P3\n");
+    else
+       if  (format == 6)  fprintf (fp, "P6\n");
+       else
+          fprintf (stderr, "\nexport format must be 3 or 6\n");
+
+    /**write maxS**/
+    fprintf (fp, "# highS: %f  lowS: %f\n", highS, lowS);
+
+    /**no parameters written yet**/
+
+    /**write sizes**/
+    fprintf (fp, "%d %d\n", h + (d_b + h) * d_y, h + (height + h) * d_x);
+
+    /**write grey values**/
+    if  (format == 3)
+        fprintf (fp, "%d\n", (int)(10000.0 * maxS));
+    if  (format == 6)
+        fprintf (fp, "255\n");
+
+    for (i = 0; i < h; ++i)                          /**1st white line**/
+        for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+            if  (format == 3)
+                fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+            if  (format == 6)
+                fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+        }
+
+    for (i = 0; i < d_x; ++i) {
+         for (a = 0; a < height; ++a) {
+
+             for (k = 0; k < h; ++k) {
+                 if  (format == 3)
+                     fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                 if  (format == 6)
+                     fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+             }
+
+             for (j = 0; j < d_y; ++j) {
+                 for (b = 0; b < d_b; ++b) {
+
+                         double valueR = S[j + i * d_y][b +  a                    * d_b];
+                         double valueG = S[j + i * d_y][b + (a + height)          * d_b];
+                         double valueB = S[j + i * d_y][b + (a + height + height) * d_b];
+
+                         /**only negative values disturb, but if all are positive, then subtraction distorts the true colors**/
+                         double shiftS = lowS < 0.0 ? lowS : 0.0;
+
+                         if  (format == 3) {
+                             red   = (int)((valueR - shiftS) * 10000.0);
+                             green = (int)((valueG - shiftS) * 10000.0);
+                             blue  = (int)((valueB - shiftS) * 10000.0);
+                         } else {
+                             red   = (int)((valueR - shiftS) / (highS - shiftS) * 255.0);
+                             green = (int)((valueG - shiftS) / (highS - shiftS) * 255.0);
+                             blue  = (int)((valueB - shiftS) / (highS - shiftS) * 255.0);
+                         }
+
+                         if  (format == 3)
+                             fprintf (fp, "%d %d %d ", red, green, blue);
+                         if  (format == 6)
+                             fprintf (fp, "%c%c%c", red, green, blue);
+                 }
+
+                 for (k = 0; k < h; ++k) {
+                     if  (format == 3)
+                         fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                     if  (format == 6)
+                         fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+                 }
+	     }
+         }
+
+         for (k = 0; k < h; ++k)         /**between + last white lines**/
+             for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+                 if  (format == 3)
+                     fprintf (fp, "%d %d %d ", hcol, hcol, hcol);
+                 if  (format == 6)
+                     fprintf (fp, "%c%c%c", hcol, hcol, hcol);
+             }
+    }
+
+    fclose (fp);
+}
+
+
+/************************* importP36_matrix **********************************/
+/* Import 1) a (weight) matrix of sizes d_x * d_y * d_a * d_b                */
+/* from filename 7) "datei". Automatic format detection (3 or 6 or 9).       */
+
+void importP36_matrix (double **S, int d_x, int d_y, int d_a, int d_b,
+                       char datei[256]) {
+    FILE *fp;
+    char kommentarzeile[256];
+
+    int format = 0, hcol1, hcol2, hcol3;
+    int h = 2, i, j, a, b, k, red = 0, green = 0, blue = 0, maxgrey;
+    char chcol1, chcol2, chcol3, cred = 0, cgreen = 0, cblue = 0;
+    double value = 0.0, maxS, highS, lowS;
+
+    fprintf(stderr, "\nreading %s ", datei);
+
+    if  ((fp = fopen (datei, "r")) == NULL) {
+        fprintf(stderr, "\nno read file %s\n", datei);  exit(0);
+    }
+
+    /**read the Px**/
+    fgets (kommentarzeile, 256, fp);
+    if  (! strcmp (kommentarzeile, "P3\n"))
+        format = 3;
+    else {
+        if  (! strcmp (kommentarzeile, "P6\n"))
+            format = 6;
+        else {
+           if  (! strcmp (kommentarzeile, "P9\n")) {
+               format = 9;
+               h = 0;        /**no frames in format P9**/
+           } else
+               fprintf (stderr, " wrong header: %s", kommentarzeile);
+        }
+    }
+    fprintf (stderr, " format=P%d ", format);
+
+    /**read maxS**/
+    fgets (kommentarzeile, 256, fp);
+    sscanf  (kommentarzeile, "# highS: %lf lowS: %lf", &highS, &lowS);
+    maxS  = fabs (highS) > fabs (lowS) ? fabs (highS) : fabs (lowS);
+    fprintf(stderr, "got maxS: highS=%f, lowS=%f\n", highS, lowS);
+
+    /**no other comment lines can be read**/
+
+    /**read sizes**/
+    fscanf (fp, "%d %d\n", &a, &b);
+
+    if  ((a != h + (d_b + h) * d_y) || (b != h + (d_a + h) * d_x)) {
+        fprintf (stderr, " sizes don't match in file %s\n", datei);
+        exit (1);
+    }
+
+    /**read grey values ** this is an int, so write an int in export only !!**/
+    fscanf (fp, "%d\n", &maxgrey);
+
+    if  ((format == 3) && (fabs (10000.0 * maxS - maxgrey) > 1.0))
+        fprintf (stderr, "\n\n\ninconsistent maximum grey value\n\n\n");
+    if  ((format == 6) && (maxgrey != 127))
+        fprintf (stderr, "\n\n\ninconsistent maximum grey value\n\n\n");
+
+    fprintf (stderr, "pgm-size: %dx%d  grey: %d  ", a, b, maxgrey);
+    fprintf (stderr, "weight-size: %dx%d x %dx%d ", d_x, d_y, d_a, d_b);
+
+    for (i = 0; i < h; ++i)                          /**1st white line**/
+        for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+            if  (format == 3)
+                fscanf (fp, "%d %d %d ", &hcol1, &hcol2, &hcol3);
+            if  (format == 6)
+                fscanf (fp, "%c%c%c", &chcol1, &chcol2, &chcol3);
+        }
+
+    for (i = 0; i < d_x; ++i) {
+         for (a = 0; a < d_a; ++a) {
+
+             for (k = 0; k < h; ++k) {
+                 if  (format == 3)
+                     fscanf (fp, "%d %d %d ", &hcol1, &hcol2, &hcol3);
+                 if  (format == 6)
+                     fscanf (fp, "%c%c%c", &chcol1, &chcol2, &chcol3);
+             }
+
+             for (j = 0; j < d_y; ++j) {
+                 for (b = 0; b < d_b; ++b) {
+
+                     if  (feof (fp))
+                         fprintf (stderr, "\n file end reached at x=%d a=%d y=%d b=%d\n", i, a, j, b);
+
+                     if  (format == 3) {
+                         fscanf (fp, "%d %d %d ", &red, &green, &blue);
+
+                         if  ((red != 0) && (green == 0))
+                             value = - (double)(red) / 10000.0;
+                         if  ((red == 0) && (green != 0))
+                             value = - (double)(red) / 10000.0;
+                         if  ((red == 0) && (green == 0))
+                             value = 0.0;
+                         if  ((red != 0) && (green != 0))
+                             fprintf (stderr, "warning: weights inconsistent");
+                     }
+
+                     if  (format == 6) {
+                         fscanf (fp, "%c%c%c", &cred, &cgreen, &cblue);
+
+                         if  ((cred != 0) && (cgreen == 0))
+                             value = - (double)(cred) / 127.0 * maxS;
+                         if  ((cred == 0) && (cgreen != 0))
+                             value =   (double)(cgreen) / 127.0 * maxS;
+                         if  ((cred == 0) && (cgreen == 0))
+                             value = 0.0;
+                         if  ((cred != 0) && (cgreen != 0))
+                             fprintf (stderr, "warning: weights inconsistent");
+                     }
+
+                     if  (format == 9)
+                         fread (&value, sizeof (double), 1, fp);
+
+                     if  ((blue != 0) || (cblue != 0))
+                         fprintf (stderr, " warning: hidden info in weights ");
+
+                     S[j + i * d_y][b + a * d_b] = value;
+
+                     if  (i == 0 && j == 0 && a == 0 && b == 0)
+                         fprintf (stderr, "\nfirst value read is: %f", value);
+
+                     if  (fabs (value) > 10000.0) {
+                         fprintf (stderr, "\nWarning: large value at index [%d][%d][%d][%d]: %f\n", i, j, a, b, value);
+                         exit (0);
+                     }
+                 }
+
+                 for (k = 0; k < h; ++k) {
+                     if  (format == 3)
+                         fscanf (fp, "%d %d %d ", &hcol1, &hcol2, &hcol3);
+                     if  (format == 6)
+                         fscanf (fp, "%c%c%c", &chcol1, &chcol2, &chcol3);
+                 }
+	     }
+         }
+
+         for (k = 0; k < h; ++k)         /**between + last white lines**/
+             for (j = 0; j < h + (d_b + h) * d_y; ++j) {
+                 if  (format == 3)
+                     fscanf (fp, "%d %d %d ", &hcol1, &hcol2, &hcol3);
+                 if  (format == 6)
+                     fscanf (fp, "%c%c%c", &chcol1, &chcol2, &chcol3);
+             }
+    }
+
+    { /**just a test**/
+      double max = -999.9;
+      double min =  999.9;
+      for (i = 0; i < d_x * d_y; ++i)
+          for (j = 0; j < d_a * d_b; ++j) {
+              max = S[i][j] > max ? S[i][j] : max;
+              min = S[i][j] < min ? S[i][j] : min;
+          }
+      fprintf (stderr, " max=%f min=%f ", max, min);
+      if  ((fabs (highS - max) > 0.01) || (fabs (lowS  - min) > 0.01)) {
+          fprintf (stderr, "\n\nWarning: inconsistent max at weight import in %s:", datei);
+          fprintf (stderr, "\n         Header: highS=%f lowS=%f  Values: max=%f min=%f\n\n", highS, lowS, max, min);
+      }
+    }
+
+    fprintf (stderr, " file read\n");
+
+    fclose (fp);
+}
+
+
+
+/************************** export_weights ***********************************/
+void export_weights (PARAMS *x, AREA *A, AGENT *Z, char dir[256]) {
+
+    int ct_ar, in_ar;
+    char fullname[256];
+    AGENT *z;
+
+    for (ct_ar = 0; ct_ar < x->areas; ++ct_ar) {
+
+        z = Z + ct_ar;
+
+        for (in_ar = 0; in_ar < x->areas; ++in_ar) {
+
+            if  (z->scaff_W[in_ar] != 0) { 
+
+                sprintf (fullname, "%s/obs_W_%d_%d.pnm", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].W[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  6, fullname);
+
+                sprintf (fullname, "%s/obs_W_%d_%d.ext", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].W[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  9, fullname);
+            }
+
+            if  (z->scaff_V[in_ar] != 0) {
+
+                sprintf (fullname, "%s/obs_V_%d_%d.pnm", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].V[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  6, fullname);
+
+                sprintf (fullname, "%s/obs_V_%d_%d.ext", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].V[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  9, fullname);
+            }
+
+            if  (z->scaff_X[in_ar] != 0) {
+
+                sprintf (fullname, "%s/obs_X_%d_%d.pnm", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].X[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  6, fullname);
+
+                sprintf (fullname, "%s/obs_X_%d_%d.ext", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].X[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  9, fullname);
+            }
+
+            if  (z->scaff_Y[in_ar] != 0) {
+
+                sprintf (fullname, "%s/obs_Y_%d_%d.pnm", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].Y[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  6, fullname);
+
+                sprintf (fullname, "%s/obs_Y_%d_%d.ext", dir, ct_ar, in_ar);
+                exportP36_matrix (A[ct_ar].Y[in_ar],
+                                  z->d_a, z->d_b, Z[in_ar].d_a, Z[in_ar].d_b,
+                                  9, fullname);
+            }
+        }
+    }
+}
+
+
+
+/************************** export_Theta *************************************/
+void export_Theta (PARAMS *x, AREA *A, AGENT *Z, char dir[256]) {
+
+    int ct_ar;
+    char fullname[256];
+    AGENT *z;
+
+    for (ct_ar = 0; ct_ar < x->areas; ++ct_ar) {
+
+        z = Z + ct_ar;
+
+        if  (z->ch_Theta) {
+
+            sprintf (fullname, "%s/obs_Th_%d.pnm", dir, ct_ar);
+            exportP36_matrix (&(A[ct_ar].Theta), 1, 1, z->d_a, z->d_b,
+                              6, fullname);
+
+            sprintf (fullname, "%s/obs_Th_%d.ext", dir, ct_ar);
+            exportP36_matrix (&(A[ct_ar].Theta), 1, 1, z->d_a, z->d_b,
+                              9, fullname);
+        }
+    }
+}
+
+
+/**************************** observe_onoff_weights **************************/
+/* Exports pos-only weights from a double-sized LGN as positive and negative.*/
+
+void observe_onoff_weights (AGENT *Z, AREA *A, COMMAND *cmd,
+                            int begin, int end, int ilen) {
+
+    char fullname[256];
+    int i, j;
+    double **W_onoff, **W;
+    AGENT *z = Z + cmd->area;
+    int inarea = cmd->n_from1[0];
+    static int zaehler = -1;
+    static int firsttime = 1;
+    static char *tmp_uname;
+
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+	firsttime = 0;
+    }
+
+    zaehler += 1;
+
+    if  (zaehler % ilen == 0) {
+
+        if  (Z[inarea].d_a != 2 * Z[inarea].d_b)
+            fprintf (stderr, "\n\nobserve_onoff_weights wants d_a[inarea] = 2 * d_b[inarea]!\n\n");
+
+        W_onoff = cmd->W_target[inarea];
+
+        W =  (double **) malloc (z->d_a * z->d_b * sizeof (double *));
+        for (i = 0; i < z->d_a * z->d_b; ++i) 
+            W[i] = (double *) malloc (Z[inarea].d_a / 2 * Z[inarea].d_b * sizeof (double));
+
+        for (i = 0; i < z->d_a * z->d_b; ++i) 
+            for (j = 0; j < Z[inarea].d_a / 2 * Z[inarea].d_b; ++j)
+                W[i][j] = W_onoff[i][j]
+                        - W_onoff[i][j + Z[inarea].d_a / 2 * Z[inarea].d_b];
+
+        sprintf (fullname, "%s/obs_W_onoff_%d_%d.pnm", tmp_uname, cmd->area, inarea);
+        exportP36_matrix (W,
+                          z->d_a, z->d_b, Z[inarea].d_a / 2, Z[inarea].d_b,
+                          6, fullname);
+
+        for (i = 0; i < z->d_a * z->d_b; ++i) 
+            free (W[i]);
+        free (W);
+
+        zaehler = 0;
+    }
+}
+
+
+
+/**************************** observe_act ************************************/
+/* Exports cmd->S_target as weight-matrix-imagefile.                         */
+
+DOUBLE observe_act (PARAMS *x, AREA *A, COMMAND *cmd, int begin, int end) {
+
+    int timespan;
+    char fullname[256];
+
+    sprintf (fullname, "%s/obs_%c_%d.pnm", cmd->pointers[0]->words[0], cmd->b_target, cmd->area);
+
+    if  ((timespan = end - begin) <= 0)
+        fprintf (stderr, "\nso sense for observe_act without time\n");
+
+    exportP36_matrix (cmd->S_target + begin,
+                      1, timespan, A[cmd->area]->d_a, A[cmd->area]->d_b,
+                      6, fullname);
+
+
+    /**used to write every time to pipe and read other pipe.
+       used with  mkfifo /tmp/uname/obs_x_x.pipe  mkfifo /tmp/uname/obs_x_x.back
+    if  (cmd->quantum[0][0] == 2) {
+        FILE *pp;
+        int j;
+        sprintf (fullname, "%s/obs_%c_%d.pipe", tmp_uname, cmd->b_target, cmd->area);
+        if  ((timespan = end - begin) <= 0)
+            fprintf (stderr, "\nso sense for observe_act without time\n");
+        exportP36_matrix (cmd->S_target + begin, 1, timespan, z->d_a, z->d_b, 6, fullname);
+        sprintf (fullname, "%s/obs_%c_%d.back", tmp_uname, cmd->b_target, cmd->area);
+        pp = fopen (fullname, "r");
+        fscanf (pp, "%d", &j);
+        if  (j != 9)
+            fprintf (stderr, "\n\nerror in pipe-feedback\n\n");
+        fclose (pp);
+    }
+    **/
+}
+
+
+
+
+/**************************** observe_col ************************************/
+/* From but different from observe_act:                                      */
+/* (i) takes S/W_from but writes file using B_target                         */
+/* (ii) assumes RGB input (3x size) and calls exportP3_col                   */
+/* b_from1 must be W or V; b_target may be also X or Y.                      */
+/* Like observe_act:                                                         */
+/* Exports cmd->S_target as weight-matrix-imagefile every ilen'th time.      */
+/* quantum[0][0] == 1 => triggers zaehler towards ilen...                    */
+/*                       one 1 only within all parameters!                   */
+
+void observe_col (AGENT *Z, AREA *A, COMMAND *cmd,
+                  int begin, int end, int ilen) {
+
+    int timespan;
+    char fullname[256];
+    AGENT *z = Z + cmd->area;
+    static int zaehler = -1;
+    static char *tmp_uname;
+    static int firsttime = 1;
+    int inarea = cmd->n_from1[0];
+
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        firsttime = 0;
+    }
+
+    /**increase zaehler only at that command with offset-value 1 or -1**/
+    if  (cmd->quantum[0][0] == 1)
+        zaehler += 1;
+
+    if  (zaehler % ilen == 0) {
+
+        /**is it a weight? (must be W or V)**/
+        if  ((cmd->b_from1[0] == 'W') || (cmd->b_from1[0] == 'V')) {
+
+            sprintf (fullname, "%s/obs_%c_%d_%d.pnm", tmp_uname, cmd->b_target, cmd->area, inarea);
+
+            if  (cmd->b_from1[0] == 'W')
+                exportP36_col (A[cmd->area].W[inarea],
+                               z->d_a, z->d_b, Z[inarea].d_a, Z[inarea].d_b,
+                               6, fullname);
+            else
+                exportP36_col (A[cmd->area].V[inarea],
+                               z->d_a, z->d_b, Z[inarea].d_a, Z[inarea].d_b,
+                               6, fullname);
+        } else {
+
+            sprintf (fullname, "%s/obs_%c_%d.pnm", tmp_uname, cmd->b_target, cmd->area);
+
+            if  ((timespan = end - begin) <= 0)
+                fprintf (stderr, "\nso sense for observe_act without time\n");
+
+            exportP36_col (cmd->S_from1[0] + begin,
+                           1, timespan, z->d_a, z->d_b,
+                           6, fullname);
+        }
+
+        zaehler = 0;
+    }
+}
+
+
+
+/**************************** observe_act_gnu ********************************/
+/* Exports cmd->S_target for splot in gnuplot every ilen'th time.            */
+/* if quantum[0][0] == 1 or -1 then this triggers zaehler towards ilen...    */
+/*               one 1 only within all parameters!                           */
+/* quantum[1][0] - 1 is the relaxation time when act is exported.            */
+
+void observe_act_gnu (AGENT *Z, AREA *A, COMMAND *cmd,
+                      int begin, int end, int ilen) {
+
+    FILE   *fp;
+    char   fullname[256];
+    AGENT  *z;
+    static int zaehler = -1;
+    double *vec;
+    int    i, j;
+    static char *tmp_uname;
+    static int firsttime = 1;
+
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        firsttime = 0;
+    }
+
+    if  (cmd->anz_quantums != 2)
+        fprintf (stderr, "\nwrong use of observe_act_gnu\n");
+
+    /**increase zaehler only at that command with offset-value 1 or -1**/
+    if  ((cmd->quantum[0][0] == 1) || (cmd->quantum[0][0] == -1))
+        zaehler += 1;
+
+    if  (zaehler % ilen == 0) {
+
+        z = Z + cmd->area;
+
+        sprintf (fullname, "%s/obs_%c_%d.dat", tmp_uname, cmd->b_target, cmd->area);
+
+        if  ((cmd->quantum[1][0] - 1 < begin) || (cmd->quantum[1][0] - 1 >= end))
+            fprintf (stderr, "\noff time in observe_act_gnu !\n");
+
+        fp = fopen (fullname, "w");
+        if  (fp == NULL)
+	  fprintf (stderr, "\nerr opeining file in observe_act_gnu\n");
+
+        vec = cmd->S_target[(int)(cmd->quantum[1][0]) - 1];
+
+        for (i = 0; i < z->d_a; ++i) {
+            for (j = 0; j < z->d_b; ++j)
+                fprintf (fp, "%f\n", vec[i * z->d_b + j]);
+            fprintf (fp, "\n");
+        }
+        fclose (fp);
+
+        zaehler = 0;
+    }
+}
+
+
+
+/**************************** observe_quad ***********************************/
+/* For Energy.                                                               */
+
+void observe_quad (AGENT *Z, AREA *A, COMMAND *cmd,
+                   int begin, int end, int ilen) {
+
+    FILE *fp;
+    int ct_t, ct_n;
+    AREA *a;
+    double **S;
+    static int zaehler = 0;
+    static double quad = 0.0;
+    static char tmp_uname_filename[256];
+    static char *tmp_uname;
+    static int firsttime = 1;
+
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        sprintf (tmp_uname_filename, "%s/obs_E", tmp_uname);
+        fp = fopen (tmp_uname_filename, "w");
+        fclose (fp);
+        firsttime = 0;
+    }
+
+    /**increase zaehler**/
+    if  ((cmd->quantum[0][0] == 1) || (cmd->quantum[0][0] == -1))
+        zaehler += 1;                                    /**right here? !!**/
+
+    a = A + cmd->area;
+    S = cmd->S_target;
+
+    /**calculate diffquad**/
+    for (ct_t = begin; ct_t < end; ++ct_t)
+
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n)
+
+            quad += S[ct_t][ct_n] * S[ct_t][ct_n];
+
+
+    /**export values and init zaehler and diffquad**/
+    if  (zaehler % ilen == 0) {
+
+        quad /= ((double)((end - begin) * a->d_r * ilen));
+
+        fp = fopen (tmp_uname_filename, "a");
+        if  (fp == NULL)  fprintf (stderr, "\ncould not open %s\n\n", tmp_uname_filename);
+
+        fprintf (fp, "%f\n", quad);
+        fclose (fp);
+
+        zaehler = 0;
+        quad = 0.0;
+    }
+}
+
+/**************************** observe_quad2 **********************************/
+/* For Energy.                                                               */
+void observe_quad2 (AGENT *Z, AREA *A, COMMAND *cmd,
+                   int begin, int end, int ilen) {
+    FILE *fp;
+    int ct_t, ct_n;
+    AREA *a;
+    double **S;
+    static int zaehler = 0;
+    static double quad = 0.0;
+    static char tmp_uname_filename[256];
+    static char *tmp_uname;
+    static int firsttime = 1;
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        sprintf (tmp_uname_filename, "%s/obs_E2", tmp_uname);
+        fp = fopen (tmp_uname_filename, "w");
+        fclose (fp);
+        firsttime = 0;
+    }
+    /**increase zaehler**/
+    if  ((cmd->quantum[0][0] == 1) || (cmd->quantum[0][0] == -1))
+        zaehler += 1;                                    /**right here? !!**/
+    a = A + cmd->area;
+    S = cmd->S_target;
+    /**calculate diffquad**/
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n)
+            quad += S[ct_t][ct_n] * S[ct_t][ct_n];
+    /**export values and init zaehler and diffquad**/
+    if  (zaehler % ilen == 0) {
+        quad /= ((double)((end - begin) * a->d_r * ilen));
+        fp = fopen (tmp_uname_filename, "a");
+        if  (fp == NULL)  fprintf (stderr, "\ncould not open %s\n\n", tmp_uname_filename);
+        fprintf (fp, "%f\n", quad);
+        fclose (fp);
+        zaehler = 0;
+        quad = 0.0;
+    }
+}
+
+/**************************** observe_quad3 **********************************/
+/* For Energy.                                                               */
+void observe_quad3 (AGENT *Z, AREA *A, COMMAND *cmd,
+                   int begin, int end, int ilen) {
+    FILE *fp;
+    int ct_t, ct_n;
+    AREA *a;
+    double **S;
+    static int zaehler = 0;
+    static double quad = 0.0;
+    static char tmp_uname_filename[256];
+    static char *tmp_uname;
+    static int firsttime = 1;
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        sprintf (tmp_uname_filename, "%s/obs_E3", tmp_uname);
+        fp = fopen (tmp_uname_filename, "w");
+        fclose (fp);
+        firsttime = 0;
+    }
+    /**increase zaehler**/
+    if  ((cmd->quantum[0][0] == 1) || (cmd->quantum[0][0] == -1))
+        zaehler += 1;                                    /**right here? !!**/
+    a = A + cmd->area;
+    S = cmd->S_target;
+    /**calculate diffquad**/
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n)
+            quad += S[ct_t][ct_n] * S[ct_t][ct_n];
+    /**export values and init zaehler and diffquad**/
+    if  (zaehler % ilen == 0) {
+        quad /= ((double)((end - begin) * a->d_r * ilen));
+        fp = fopen (tmp_uname_filename, "a");
+        if  (fp == NULL)  fprintf (stderr, "\ncould not open %s\n\n", tmp_uname_filename);
+        fprintf (fp, "%f\n", quad);
+        fclose (fp);
+        zaehler = 0;
+        quad = 0.0;
+    }
+}
+
+/**************************** observe_quad4 **********************************/
+/* For Energy.                                                               */
+void observe_quad4 (AGENT *Z, AREA *A, COMMAND *cmd,
+                   int begin, int end, int ilen) {
+    FILE *fp;
+    int ct_t, ct_n;
+    AREA *a;
+    double **S;
+    static int zaehler = 0;
+    static double quad = 0.0;
+    static char tmp_uname_filename[256];
+    static char *tmp_uname;
+    static int firsttime = 1;
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        sprintf (tmp_uname_filename, "%s/obs_E4", tmp_uname);
+        fp = fopen (tmp_uname_filename, "w");
+        fclose (fp);
+        firsttime = 0;
+    }
+    /**increase zaehler**/
+    if  ((cmd->quantum[0][0] == 1) || (cmd->quantum[0][0] == -1))
+        zaehler += 1;                                    /**right here? !!**/
+    a = A + cmd->area;
+    S = cmd->S_target;
+    /**calculate diffquad**/
+    for (ct_t = begin; ct_t < end; ++ct_t)
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n)
+            quad += S[ct_t][ct_n] * S[ct_t][ct_n];
+    /**export values and init zaehler and diffquad**/
+    if  (zaehler % ilen == 0) {
+        quad /= ((double)((end - begin) * a->d_r * ilen));
+        fp = fopen (tmp_uname_filename, "a");
+        if  (fp == NULL)  fprintf (stderr, "\ncould not open %s\n\n", tmp_uname_filename);
+        fprintf (fp, "%f\n", quad);
+        fclose (fp);
+        zaehler = 0;
+        quad = 0.0;
+    }
+}
+
+
+
+/**************************** observe_act_stat *******************************/
+/* For each area and activity given in 4) cmd  writes mean, quad and kurt    */
+/* once in a batch, averaged over rlen and ilen, to /tmp/uname/obs_info.     */
+
+void observe_act_stat (AGENT *Z, AREA *A, COMMAND *cmd,
+                       int begin, int end, int ilen) {
+    FILE *fp;
+    int ct_t, ct_n;
+    double *mean = NULL, *quad = NULL, *kurt = NULL, *cova = NULL;
+    AREA *a;
+    double **S;
+    int OK = 0;
+    static int zaehler = 0;
+    char tmp_uname_filename[256];
+    static char *tmp_uname;
+    static int firsttime = 1;
+
+    if  (firsttime) {
+        tmp_uname = get_tmp_uname ();
+        firsttime = 0;
+    }
+
+    sprintf (tmp_uname_filename, "%s/obs_info", tmp_uname);
+
+    if  (cmd->quantum[0][0] == -1)
+        fprintf (stderr, "\nobserve_act_stat doesn't like offset -1!\n");
+
+    a = A + cmd->area;
+    S = cmd->S_target;
+
+    if  (cmd->b_target == 'O') {
+        mean = &a->obs_O_mean;
+        quad = &a->obs_O_quad;
+        kurt = &a->obs_O_kurt;
+        cova = &a->obs_O_cova;
+        OK = 1;
+    }
+    if  (cmd->b_target == 'P') {
+        mean = &a->obs_P_mean;
+        quad = &a->obs_P_quad;
+        kurt = &a->obs_P_kurt;
+        cova = &a->obs_P_cova;
+        OK = 1;
+    }
+    if  (cmd->b_target == 'Q') {
+        mean = &a->obs_Q_mean;
+        quad = &a->obs_Q_quad;
+        kurt = &a->obs_Q_kurt;
+        cova = &a->obs_Q_cova;
+        OK = 1;
+    }
+    if  (cmd->b_target == 'R') {
+        mean = &a->obs_R_mean;
+        quad = &a->obs_R_quad;
+        kurt = &a->obs_R_kurt;
+        cova = &a->obs_R_cova;
+        OK = 1;
+    }
+    if  (cmd->b_target == 'S') {
+        mean = &a->obs_S_mean;
+        quad = &a->obs_S_quad;
+        kurt = &a->obs_S_kurt;
+        cova = &a->obs_S_cova;
+        OK = 1;
+    }
+    if  (cmd->b_target == 'T') {
+        mean = &a->obs_T_mean;
+        quad = &a->obs_T_quad;
+        kurt = &a->obs_T_kurt;
+        cova = &a->obs_T_cova;
+        OK = 1;
+    }
+
+    if  (! OK)  fprintf (stderr, "\nNo valid assignment in obs_act_stat!\n\n");
+
+    for (ct_t = begin; ct_t < end; ++ct_t) {
+
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n) {
+            *mean += S[ct_t][ct_n];                                     /**mean**/
+            *quad += S[ct_t][ct_n] * S[ct_t][ct_n];                     /**quad**/
+        }
+        *kurt += f_kurtosis (S[ct_t], a->d_r);                          /**kurt**/
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n) {
+            int ct_nn;
+            for (ct_nn = 0; ct_nn < a->d_r; ++ct_nn)
+                if  (ct_nn != ct_n)                                                           /**<-- NOT self-connection**/
+                    *cova += S[ct_t][ct_n] * S[ct_t][ct_nn];                /**cova**/
+        }
+    }
+
+
+    if  ((cmd->quantum[0][0] == 1) && (zaehler % ilen == 0))
+        fp = fopen (tmp_uname_filename, "w");
+    else
+        fp = fopen (tmp_uname_filename, "a");
+
+
+    if  ( ((cmd->quantum[0][0] == 1) && (zaehler % ilen == 0))
+       || ((cmd->quantum[0][0] != 1) && (zaehler % ilen == 1))) {
+
+        *mean /= ((double)((end - begin) * a->d_r * ilen));
+        *quad /= ((double)((end - begin) * a->d_r * ilen));
+        *kurt /= ((double)((end - begin) * a->d_r * ilen));
+        *cova /= ((double)((end - begin) * a->d_r * (a->d_r - 1) * ilen));                    /**<-- NOT self-connection**/
+
+        if  (fp == NULL)  fprintf (stderr, "\nCould not open %s\n", tmp_uname_filename);
+        fprintf (fp, "%d, %c: mean=%f quad=%f kurt=%f cova=%f sqcova=%f\n",
+                      cmd->area, cmd->b_target, *mean, *quad, *kurt, *cova, sqrt (*cova));
+
+        *mean = 0.0;
+        *quad = 0.0;
+        *kurt = 0.0;
+        *cova = 0.0;
+    }
+
+    fclose (fp);
+
+    if  ((cmd->quantum[0][0] == 1) && (zaehler % ilen == 0))
+        zaehler = 0;
+
+    if  (cmd->quantum[0][0] == 1)
+        zaehler += 1;
+}
+
+
+
+/**************************** observe_act_time *******************************/
+/* For area and activity given in 4) cmd  writes once a batch time course of */
+/* mean, quad and kurt, averaged over ilen, running averaged over elen,      */
+/* to /tmp/uname/obs_time.                                                   */
+/* Warning: must be evoked only once!!                                       */
+
+void observe_act_time (AGENT *Z, AREA *A, COMMAND *cmd,
+                       int begin, int end, int ilen) {
+    FILE *fp = NULL;
+    int ct_t, ct_n;
+    AREA *a;
+    double **S, normfact;
+
+    static double *time_mean, *time_quad, *time_kurt, *time_olap, *time_corr;
+    static double *time_mean_avg, *time_quad_avg, *time_kurt_avg,
+                  *time_olap_avg, *time_corr_avg;
+    static int zaehler = 0;
+    static double batches = 0.0;
+    static int firsttime = 1;
+
+    char tmp_uname_filename[256];
+
+    if  (firsttime)
+        sprintf (tmp_uname_filename, "%s/obs_time", get_tmp_uname ());
+
+    a = A + cmd->area;
+    S = cmd->S_target;
+
+    /**allocate memory and init with zero**/
+    if  (firsttime) {
+        time_mean = (double *)calloc(end - begin, sizeof (double));
+        time_quad = (double *)calloc(end - begin, sizeof (double));
+        time_kurt = (double *)calloc(end - begin, sizeof (double));
+        time_olap = (double *)calloc(end - begin, sizeof (double));
+        time_corr = (double *)calloc(end - begin, sizeof (double));
+        time_mean_avg = (double *)calloc(end - begin, sizeof (double));
+        time_quad_avg = (double *)calloc(end - begin, sizeof (double));
+        time_kurt_avg = (double *)calloc(end - begin, sizeof (double));
+        time_olap_avg = (double *)calloc(end - begin, sizeof (double));
+        time_corr_avg = (double *)calloc(end - begin, sizeof (double));
+        firsttime = 0;
+    }
+
+    /**compute the values at each sweep (ilen times in a batch)**/
+    for (ct_t = 0; ct_t < end - begin; ++ct_t) {
+
+        int haeuf_0 = 0, haeuf_1 = 0;
+
+        for (ct_n = 0; ct_n < a->d_r; ++ct_n) {
+
+            time_mean[ct_t] += S[ct_t + begin][ct_n];
+
+            time_quad[ct_t] += S[ct_t + begin][ct_n] * S[ct_t + begin][ct_n];
+
+            if  (ct_t == 0)
+                time_olap[ct_t] = 0.0;
+            else
+                time_olap[ct_t] += S[ct_t + begin - 1][ct_n]
+                                 * S[ct_t + begin][ct_n];
+
+            if  (S[ct_t + begin][ct_n] < 0.5)
+                haeuf_0 += 1;
+            else
+                haeuf_1 += 1;
+        }
+        time_kurt[ct_t] += f_kurtosis (S[ct_t + begin], a->d_r);
+        time_corr[ct_t] += (double)(haeuf_0 * haeuf_1);
+    }
+
+
+    /**once a batch, average with values of all last batches and export**/
+    if  ((cmd->quantum[0][0] == 1) && (zaehler % ilen == 0)) {
+
+        batches += 1.0;
+
+        /**sich anpassender Mittelwert: avg = 1/n * ((n-1)*avg + neuerwert)**/
+        for (ct_t = 0; ct_t < end - begin; ++ct_t) {
+
+            /**normalize w.r.t. ilen (of one batch) and d_r (of area)**/
+            normfact = 1.0 / (double)(a->d_r) / (double)(ilen);
+
+            time_mean[ct_t] *= normfact;
+            time_quad[ct_t] *= normfact;
+            time_kurt[ct_t] *= normfact;
+            time_olap[ct_t] *= normfact;
+            time_corr[ct_t] *= normfact;
+
+            /**too complicated ...
+            time_mean_avg[ct_t] = 1.0 / batches
+                   * ((batches - 1.0) * time_mean_avg[ct_t] + time_mean[ct_t]);
+            time_quad_avg[ct_t] = 1.0 / batches
+                   * ((batches - 1.0) * time_quad_avg[ct_t] + time_quad[ct_t]);
+            time_kurt_avg[ct_t] = 1.0 / batches
+                   * ((batches - 1.0) * time_kurt_avg[ct_t] + time_kurt[ct_t]);
+            time_olap_avg[ct_t] = 1.0 / batches
+                   * ((batches - 1.0) * time_olap_avg[ct_t] + time_olap[ct_t]);
+            time_corr_avg[ct_t] = 1.0 / batches
+                   * ((batches - 1.0) * time_corr_avg[ct_t] + time_corr[ct_t]);
+            **/
+
+            time_mean_avg[ct_t] = time_mean[ct_t];
+            time_quad_avg[ct_t] = time_quad[ct_t];
+            time_kurt_avg[ct_t] = time_kurt[ct_t];
+            time_olap_avg[ct_t] = time_olap[ct_t];
+            time_corr_avg[ct_t] = time_corr[ct_t];
+
+            time_mean[ct_t] = 0.0;
+            time_quad[ct_t] = 0.0;
+            time_kurt[ct_t] = 0.0;
+            time_olap[ct_t] = 0.0;
+            time_corr[ct_t] = 0.0;
+        }
+
+        if  ((fp = fopen (tmp_uname_filename, "a")) == NULL)
+            fprintf (stderr, "\nCould not open %s\n", tmp_uname_filename);
+
+        for (ct_t = 0; ct_t < end - begin; ++ct_t)
+            fprintf (fp, "%f %f %f %f %f\n",
+                time_mean_avg[ct_t], time_quad_avg[ct_t], time_kurt_avg[ct_t],
+                time_olap_avg[ct_t], time_corr_avg[ct_t]);
+
+        fclose (fp);
+    }
+
+/* plot "/tmp/cs0cwe/obs_time" using 1 title "mean", "/tmp/cs0cwe/obs_time" using 2 title "quad", "/tmp/cs0cwe/obs_time" using 3 title "kurt", "/tmp/cs0cwe/obs_time" using 4 title "olap", "/tmp/cs0cwe/obs_time" using 5 title "corr" */
+
+    /**once a batch, count from the beginning**/
+    if  ((cmd->quantum[0][0] == 1) && (zaehler % ilen == 0))
+        zaehler = 0;
+
+    /**else, count**/
+    if  (cmd->quantum[0][0] == 1)
+        zaehler += 1;
+}
+
+
+/************************* observe_sophie1d **********************************/
+/* Prints into /tmp/uname/obs_1d_W.gnu weights of the sophie1d simulation.   */
+/* Averages weights and prints to second column stddev of the weight value.  */
+
+void observe_sophie1d (AGENT *Z, AREA *A, COMMAND *cmd,
+                       int begin, int end, int ilen) {
+    FILE *fp = NULL;
+    static int firsttime = 1;
+    static double *weights_mean;
+    static double *weights_stddev;
+    double **W;
+    int n, b, b_ct;
+    static int count = -1;
+
+    count += 1;
+
+    if  (Z[0].d_a != 1)  fprintf (stderr, "\nobserve_sophie1d wants d_b=1\n");
+    if  (Z[0].d_b == 1)  fprintf (stderr, "\nd_b should prob be > 1 ey?\n");
+
+    /**allocate memory and init with zero**/
+    if  (firsttime) {
+        weights_mean = (double *)calloc(Z[0].d_b, sizeof (double));
+        weights_stddev = (double *)calloc(Z[0].d_b, sizeof (double));
+        firsttime = 0;
+    }
+
+    W  = cmd->W_target[0];
+               /*[inarea]*/
+
+    for (b = 0; b < Z[0].d_b; ++b) {
+        weights_mean[b] = 0.0;
+        weights_stddev[b] = 0.0;
+    }
+
+    for (n = 0; n < Z[0].d_b; ++n)
+        for (b = 0; b < Z[0].d_b; ++b) {
+            b_ct = b + n;
+            if  (b_ct >= Z[0].d_b)
+                b_ct -= Z[0].d_b;
+            weights_mean[b] += W[n][b_ct];
+        }
+
+    for (b = 0; b < Z[0].d_b; ++b)
+        weights_mean[b] /= (double)(Z[0].d_b);
+
+    for (n = 0; n < Z[0].d_b; ++n)
+        for (b = 0; b < Z[0].d_b; ++b) {
+            b_ct = b + n;
+            if  (b_ct >= Z[0].d_b)
+                b_ct -= Z[0].d_b;
+            weights_stddev[b] += (weights_mean[b] - W[n][b_ct]) * (weights_mean[b] - W[n][b_ct]);
+        }
+
+
+    if  (count % 100 == 0) {
+        char tmp_uname_filename[256];
+        sprintf (tmp_uname_filename, "%s/obs_1d_W.gnu", get_tmp_uname ());
+
+        if  ((fp = fopen (tmp_uname_filename, "w")) == NULL)
+            fprintf (stderr, "\nCould not open %s\n", tmp_uname_filename);
+
+        for (b = 0; b < Z[0].d_b; ++b)
+            fprintf (fp, "%f %f\n", weights_mean[b], weights_stddev[b]);
+        fprintf (fp, "%f %f\n", weights_mean[0], weights_stddev[0]);
+
+        fclose (fp);
+    }
+
+    if  (count % 1000 == 0) {
+        char tmp_uname_filename[256];
+        sprintf (tmp_uname_filename, "%s/obs_1d_Wmax.gnu", get_tmp_uname ());
+
+        if  ((fp = fopen (tmp_uname_filename, "a")) == NULL)
+            fprintf (stderr, "\nCould not open %s\n", tmp_uname_filename);
+
+        fprintf (fp, "%f\n", weights_mean[0]);
+
+        fclose (fp);
+    }
+
+}
+
+
+/**************************** observe_getc ***********************************/
+
+void observe_getc (AGENT *Z, AREA *A, COMMAND *cmd,
+                   int begin, int end, int ilen) {
+
+    getc (stdin);
+}

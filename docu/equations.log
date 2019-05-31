@@ -1,0 +1,172 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2002.10.2)  4 OCT 2002 09:09
+**equations.tex
+(equations.tex
+LaTeX2e <2000/06/01>
+Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2000/05/19 v1.4b Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size12.clo
+File: size12.clo 2000/05/19 v1.4b Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+) (equations.aux)
+\openout1 = `equations.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 34.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 34.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 34.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 71.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 71.
+ [1
+
+] [2] [3]
+[4]
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 341--358
+
+ []
+
+[5] [6] [7]
+Underfull \hbox (badness 10000) in paragraph at lines 515--529
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--529
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--529
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--529
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--529
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 531--550
+
+ []
+
+[9] [10]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 627.
+
+Overfull \hbox (39.64542pt too wide) detected at line 642
+\OMS/cmsy/m/n/10.95 j\OML/cmm/m/it/10.95 I \OMS/cmsy/m/n/10.95 ^^@ \OT1/cmr/m/n
+/10.95 ^^H\OML/cmm/m/it/10.95 a\OMS/cmsy/m/n/10.95 j[]  \OT1/cmr/m/n/10.95 =  (
+\OML/cmm/m/it/10.95 I \OMS/cmsy/m/n/10.95 ^^@ \OT1/cmr/m/n/10.95 ^^H\OML/cmm/m/
+it/10.95 a\OT1/cmr/m/n/10.95 )[](\OML/cmm/m/it/10.95 I \OMS/cmsy/m/n/10.95 ^^@ 
+\OT1/cmr/m/n/10.95 ^^H\OML/cmm/m/it/10.95 a\OT1/cmr/m/n/10.95 )  =  \OML/cmm/m/
+it/10.95 I[]I  \OMS/cmsy/m/n/10.95 ^^@  \OML/cmm/m/it/10.95 I[]\OT1/cmr/m/n/10.
+95 ^^H\OML/cmm/m/it/10.95 a  \OMS/cmsy/m/n/10.95 ^^@  []  \OT1/cmr/m/n/10.95 + 
+(^^H\OML/cmm/m/it/10.95 a\OT1/cmr/m/n/10.95 )[](^^H\OML/cmm/m/it/10.95 a\OT1/cm
+r/m/n/10.95 )  =  \OML/cmm/m/it/10.95 I[]I  \OMS/cmsy/m/n/10.95 ^^@  \OT1/cmr/m
+/n/10.95 2 \OMS/cmsy/m/n/10.95 ^^A \OML/cmm/m/it/10.95 I[]\OT1/cmr/m/n/10.95 ^^
+H\OML/cmm/m/it/10.95 a  \OT1/cmr/m/n/10.95 +  \OML/cmm/m/it/10.95 a[]\OT1/cmr/m
+/n/10.95 ^^H[]^^H\OML/cmm/m/it/10.95 a
+ []
+
+[11
+
+] (equations.aux) ) 
+Here is how much of TeX's memory you used:
+ 273 strings out of 20887
+ 2711 string characters out of 197363
+ 52377 words of memory out of 350001
+ 3275 multiletter control sequences out of 10000+15000
+ 11141 words of font info for 39 fonts, out of 400000 for 1000
+ 14 hyphenation exceptions out of 10000
+ 22i,11n,20p,309b,198s stack positions out of 3000i,100n,1500p,50000b,4000s
+
+Output written on equations.dvi (11 pages, 43188 bytes).
