@@ -62,9 +62,9 @@ Currently, the following files are supplied, addressing the following papers:
 
   Such a network also constitutes the lateral, predictive weights in the following:
 
-- v/CortexDocking
-  v/CortexDocking_analyze
-  v/flowfield.tcl
+- v/CortexDocking  
+  v/CortexDocking_analyze  
+  v/flowfield.tcl  
 
   The first produces, the latter analyze, the toy example weights of:
   "A hybrid generative and predictive model of the motor cortex"
