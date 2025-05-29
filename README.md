@@ -73,13 +73,13 @@ Currently, the following files are supplied, addressing the following papers:
 
 - v/SigmaPi_1dim
 
-  This creates Fig.6a) of:
+  This creates Fig.6a) of:  
   "A Self-Organizing Map of Sigma-Pi Units",
   C. Weber and S. Wermter, *Neurocomputing* (2006/7, in press).
 
 - v/Vert_Horiz_Saccades
 
-  This creates Fig.5 of:
+  This creates Fig.5 of:  
   "A possible representation of reward in the learning of saccades"
   C. Weber and J. Triesch, Proc. Epigenetic Robotics, pp. 153-60 (2006).
 
